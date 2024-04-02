@@ -310,15 +310,15 @@ class Process_Read:
             # prefix and suffix present and in right orientation
             if oriented:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info, suffix_info)
-                print(self.get_align_info(row, prefix_info, suffix_info))
+                print(self.get_align_info(self.target_info[row.name]))
             # only prefix present
-            elif read_status[1] == 1:
+            elif read_status == 1:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info, False)
-                print(self.get_align_info(row, prefix_info, False))
+                print(self.get_align_info(self.target_info[row.name]))
             # only suffix present
-            elif read_status[1] == 2:
+            elif read_status == 2:
                 self.target_info[row.name] = self.get_align_info(row, False, suffix_info)
-                print(self.get_align_info(row, False, suffix_info))
+                print(self.get_align_info(self.target_info[row.name]))
 
             print(self.target_info[row.name])
 
