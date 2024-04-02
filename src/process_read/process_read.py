@@ -145,11 +145,6 @@ class Process_Read:
         if not (isinstance(prefix_info, (bool))):
             info["suffix_align_length"] = suffix_info.alignment_length[0]
 
-
-
-
-
-
         # both prefix and suffix info are present
         if not (isinstance(prefix_info, (bool))) and not (isinstance(prefix_info, (bool))):
         # get strand and start and end coordinates
@@ -249,15 +244,23 @@ class Process_Read:
         -----------------------------------------------------------------------------------------------------
         targets_df: pandas DataFrame. DataFrame of tandem repeat target loci to compare to alignment results
         '''
+
+        # print(f"aligning targets for read: {self.seq}") # reaches this step with no issues
+
+
+        print("Assigning a target for a read")
+
         #check if any alignemnts returned
         if isinstance(self.prefix_df, (bool)) or isinstance(self.suffix_df, (bool)): #no alignments
+            print("no_alignments")
             return False #need to decide on final returns for this function still
-        
+
         #subset to only get targets that aligned according to mappy
         # candidate targets are targets where th name is present in eitehr prefix or suffix dictionary
-        candidate_targets = targets_df[targets_df.name.isin(self.prefix_df.name) or targets_df.name.isin(self.suffix_df.name)] #previously sub_targ
+        candidate_targets = targets_df[(targets_df.name.isin(self.prefix_df.name)) | (targets_df.name.isin(self.suffix_df.name))] #previously sub_targ
         # the original above code assumes that the prefix is present, changed to require one of suffixes or prefixes
 
+        print(f"Candidates: {candidate_targets}")
 
         #get the best alignments per target identified (previously sub_prefixes and sub_suffixes)
         candidate_prefix_aligns = self.prefix_df.groupby('name').head(1).reset_index()
@@ -270,6 +273,7 @@ class Process_Read:
             #save valid regions' attributes
             # keep status of read
             read_status = self.keep_region(prefix_info, suffix_info)
+            print(f"Result of keep region {read_status}")
             if read_status[0]:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info, suffix_info)
             # only prefix present
