@@ -101,18 +101,19 @@ class Process_Read:
         '''
 
         # check that both contain alignemnts
-        if len(suffix_info.index) != 0 and len(prefix_info.index) != 0:
-            # check alignments are on the same strand
-            if prefix_info.strand[0] == suffix_info.strand[0]: 
-                return(True,3)
-            else:
-                # reverse
-                return(False,3)
+        if not isinstance(prefix_info, (bool)) and not isinstance(suffix_info, (bool)):
+            if len(suffix_info.index) != 0 and len(prefix_info.index) != 0:
+                # check alignments are on the same strand
+                if prefix_info.strand[0] == suffix_info.strand[0]: 
+                    return(True,3)
+                else:
+                    # reverse
+                    return(False,3)
+        elif isinstance(prefix_info, (bool)) and isinstance(suffix_info, (bool)):
         # neither aligned
-        if len(suffix_info.index) == 0 and len(prefix_info.index) == 0:
             return(False, 0)
         # just prefix aligned
-        elif len(suffix_info.index) == 0 and len(prefix_info.index) != 0:
+        elif not isinstance(prefix_info, (bool)):
             return(False, 1)
         # suffix aligned
         else:
@@ -293,10 +294,17 @@ class Process_Read:
             print(f"Target row: {row}")
             if not (isinstance(self.prefix_df, (bool))):
                 prefix_info =  candidate_prefix_aligns[candidate_prefix_aligns.name == row.name].reset_index()
+            else:
+                prefix_info = False
+
             if not (isinstance(self.suffix_df, (bool))): 
                 suffix_info = candidate_suffix_aligns[candidate_suffix_aligns.name == row.name].reset_index()
+            else: 
+                suffix_info = False
+            
             #save valid regions' attributes
             # keep status of read
+            print("checking read status")
             oriented, read_status = self.keep_region(prefix_info, suffix_info)
             print(f"Oriented and result of keep region: {oriented}, {read_status}")
             # prefix and suffix present and in right orientation
@@ -311,6 +319,8 @@ class Process_Read:
             elif read_status[1] == 2:
                 self.target_info[row.name] = self.get_align_info(row, False, suffix_info)
                 print(self.get_align_info(row, False, suffix_info))
+
+            print(self.target_info[row.name])
 
     def run_viterbi(self,hmm_file,rev_hmm_file,hidden_states,rev_states,out,build_pre, prefix_idx,output_labelled_seqs):
         '''

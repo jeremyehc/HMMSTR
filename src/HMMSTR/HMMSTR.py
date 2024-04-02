@@ -739,6 +739,11 @@ def main():
         pool_end = perf_counter()
         print("All reads processed, the pooled run took: ", pool_end-pool_start)
 
+
+
+
+
+
     #stats runs and allele calls
     if args.hmm_pre is None:
         build_pre = args.out #need to make sure this is compatible with new build all implentation
