@@ -158,6 +158,7 @@ def count_repeats(labeled_seq, pointers,repeat_len):
 
     #calculate counts from adjusted length, deletions already accounted for in labeled sequence
     count = adjusted_length/repeat_len
+    print(f"count: {count}")
     return count
 
 def print_labelled(read_id,strand,sub_labels,context,pointers,out):
