@@ -282,15 +282,19 @@ class Process_Read:
         print("Candidates identified above")
 
         #get the best alignments per target identified (previously sub_prefixes and sub_suffixes)
-        candidate_prefix_aligns = self.prefix_df.groupby('name').head(1).reset_index()
-        candidate_suffix_aligns = self.suffix_df.groupby('name').head(1).reset_index()
+        if not (isinstance(self.prefix_df, (bool))):
+            candidate_prefix_aligns = self.prefix_df.groupby('name').head(1).reset_index()
+        if not (isinstance(self.suffix_df, (bool))):   
+            candidate_suffix_aligns = self.suffix_df.groupby('name').head(1).reset_index()
         self.target_info = {}
 
         #filter candidates that aren't in a compatible orientation and save final candidates
         for row in candidate_targets.itertuples():
             print(f"Target row: {row}")
-            prefix_info =  candidate_prefix_aligns[candidate_prefix_aligns.name == row.name].reset_index()
-            suffix_info = candidate_suffix_aligns[candidate_suffix_aligns.name == row.name].reset_index()
+            if not (isinstance(self.prefix_df, (bool))):
+                prefix_info =  candidate_prefix_aligns[candidate_prefix_aligns.name == row.name].reset_index()
+            if not (isinstance(self.suffix_df, (bool))): 
+                suffix_info = candidate_suffix_aligns[candidate_suffix_aligns.name == row.name].reset_index()
             #save valid regions' attributes
             # keep status of read
             oriented, read_status = self.keep_region(prefix_info, suffix_info)
