@@ -259,8 +259,17 @@ class Process_Read:
             print("missing prefix and suffix")
             return False #need to decide on final returns for this function still
 
+        print("Prefix or suffix present")
+
         #subset to only get targets that aligned according to mappy
         # candidate targets are targets where th name is present in eitehr prefix or suffix dictionary
+        if self.prefix_df != False:
+            prefix_targets = targets_df[targets_df.name.isin(self.prefix_df.name)]
+            print(prefix_targets)
+        elif self.suffix_df != False:
+            suffix_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
+            print(suffix_targets)
+
         candidate_targets = targets_df[(targets_df.name.isin(self.prefix_df.name)) | (targets_df.name.isin(self.suffix_df.name))] #previously sub_targ
         # the original above code assumes that the prefix is present, changed to require one of suffixes or prefixes
 
