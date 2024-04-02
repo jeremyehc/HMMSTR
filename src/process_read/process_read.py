@@ -147,9 +147,13 @@ class Process_Read:
         if not (isinstance(suffix_info, (bool))):
             info["suffix_align_length"] = suffix_info.alignment_length[0]
 
+        print("info here")
+        print(info)
+
         # both prefix and suffix info are present
-        if not (isinstance(prefix_info, (bool))) and not (isinstance(prefix_info, (bool))):
+        if (not (isinstance(prefix_info, (bool)))) and (not (isinstance(prefix_info, (bool)))):
         # get strand and start and end coordinates
+            print("prefix and suffix present in info")
             if prefix_info.strand[0] == 1 and suffix_info.strand[0] == 1:
                 info["strand"] = "forward"
                 info["align_start"] = prefix_info.prefix_start[0]
@@ -201,6 +205,9 @@ class Process_Read:
                 info["start_length"] = 0
 
 
+        print("prior to return")
+        print(info)
+        
         # Review how to do subsetting with only prefix or suffix
         if self.use_full_seq:
             info["subset"] = self.seq
