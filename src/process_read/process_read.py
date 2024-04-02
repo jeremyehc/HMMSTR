@@ -143,15 +143,20 @@ class Process_Read:
         # get prefix info if prefix is present
         if not (isinstance(prefix_info, (bool))):
             info["prefix_align_length"] = prefix_info.alignment_length[0]
+        else:
+            info["prefix_align_length"] = 0
+
         # get suffix info if suffix is present
         if not (isinstance(suffix_info, (bool))):
             info["suffix_align_length"] = suffix_info.alignment_length[0]
+        else: 
+            info["suffix_align_length"] = 0
 
         print("info here")
         print(info)
 
         # both prefix and suffix info are present
-        if (not (isinstance(prefix_info, (bool)))) and (not (isinstance(prefix_info, (bool)))):
+        if (info["prefix_align_length"] > 0) and (info["suffix_align_length"] > 0):
         # get strand and start and end coordinates
             print("prefix and suffix present in info")
             if prefix_info.strand[0] == 1 and suffix_info.strand[0] == 1:
@@ -174,7 +179,7 @@ class Process_Read:
 
         # A bit of confusion regarding strandedness here: review this for correctness
         # only prefix present
-        elif (isinstance(suffix_info, (bool))):
+        elif info["prefix_align_length"] > 0:
             print("missing suffix")
             info["align_start"] = prefix_info.prefix_start[0]
             info["align_end"] = prefix_info.prefix_end[0]
@@ -207,7 +212,7 @@ class Process_Read:
 
         print("prior to return")
         print(info)
-        
+
         # Review how to do subsetting with only prefix or suffix
         if self.use_full_seq:
             info["subset"] = self.seq
@@ -322,13 +327,13 @@ class Process_Read:
             # only prefix present
             elif read_status == 1:
                 print("read status 1")
-                self.target_info[row.name] = self.get_align_info(row, prefix_info, False)
+                self.target_info[row.name] = self.get_align_info(row, prefix_info=prefix_info, suffix_info=False)
                 print("pass")
                 print(self.get_align_info(self.target_info[row.name]))
                 print("pass2")
             # only suffix present
             elif read_status == 2:
-                self.target_info[row.name] = self.get_align_info(row, False, suffix_info)
+                self.target_info[row.name] = self.get_align_info(row, prefix_info=False, suffix_info=suffix_info)
                 print(self.get_align_info(self.target_info[row.name]))
 
             print(self.target_info[row.name])
