@@ -39,6 +39,7 @@ def label_states(vit_out, hidden_states):
         if "R" in conversion[seq_list[i]] and pointers["R"] == False:
             pointers["R"] = i
         # suffix
+        # for nonthrough reads: there will be no suffix in conversion[seq_list] so pointers for S will remain false
         if  "S" in conversion[seq_list[i]] and pointers["S"] == False:
             pointers["S"] = i
         # genome2
