@@ -171,6 +171,7 @@ class Process_Read:
         # A bit of confusion regarding strandedness here: review this for correctness
         # only prefix present
         elif (isinstance(suffix_info, (bool))):
+            print("missing suffix")
             info["align_start"] = prefix_info.prefix_start[0]
             info["align_end"] = prefix_info.prefix_end[0]
 
@@ -313,8 +314,11 @@ class Process_Read:
                 print(self.get_align_info(self.target_info[row.name]))
             # only prefix present
             elif read_status == 1:
+                print("read status 1")
                 self.target_info[row.name] = self.get_align_info(row, prefix_info, False)
+                print("pass")
                 print(self.get_align_info(self.target_info[row.name]))
+                print("pass2")
             # only suffix present
             elif read_status == 2:
                 self.target_info[row.name] = self.get_align_info(row, False, suffix_info)
