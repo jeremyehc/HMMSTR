@@ -106,6 +106,7 @@ class Process_Read:
             if prefix_info.strand[0] == suffix_info.strand[0]: 
                 return(True,3)
             else:
+                # reverse
                 return(False,3)
         # neither aligned
         if len(suffix_info.index) == 0 and len(prefix_info.index) == 0:
@@ -141,8 +142,8 @@ class Process_Read:
         # get prefix info if prefix is present
         if not (isinstance(prefix_info, (bool))):
             info["prefix_align_length"] = prefix_info.alignment_length[0]
-        # get suffic info if suffix is present
-        if not (isinstance(prefix_info, (bool))):
+        # get suffix info if suffix is present
+        if not (isinstance(suffix_info, (bool))):
             info["suffix_align_length"] = suffix_info.alignment_length[0]
 
         # both prefix and suffix info are present
@@ -198,7 +199,7 @@ class Process_Read:
                 info["start_length"] = 0
 
 
-
+        # Review how to do subsetting with only prefix or suffix
         if self.use_full_seq:
             info["subset"] = self.seq
             #ADDED record subset coords so we can calculate repeat coordinates
@@ -251,7 +252,7 @@ class Process_Read:
         print("Assigning a target for a read")
 
         #check if any alignemnts returned
-        if isinstance(self.prefix_df, (bool)) or isinstance(self.suffix_df, (bool)): #no alignments
+        if isinstance(self.prefix_df, (bool)) and isinstance(self.suffix_df, (bool)): #no alignments
             print("no_alignments")
             return False #need to decide on final returns for this function still
 
@@ -272,9 +273,10 @@ class Process_Read:
             suffix_info = candidate_suffix_aligns[candidate_suffix_aligns.name == row.name].reset_index()
             #save valid regions' attributes
             # keep status of read
-            read_status = self.keep_region(prefix_info, suffix_info)
+            oriented, read_status = self.keep_region(prefix_info, suffix_info)
             print(f"Result of keep region {read_status}")
-            if read_status[0]:
+            # prefix and suffix present and in right orientation
+            if oriented:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info, suffix_info)
             # only prefix present
             elif read_status[1] == 1:
