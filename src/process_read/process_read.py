@@ -268,18 +268,18 @@ class Process_Read:
         print(isinstance(self.suffix_df, (bool)))
 
         if not (isinstance(self.prefix_df, (bool))):
-            prefix_targets = targets_df[targets_df.name.isin(self.prefix_df.name)]
+            candidate_targets = targets_df[targets_df.name.isin(self.prefix_df.name)]
             print("pt")
-            print(prefix_targets)
+            print(candidate_targets)
         elif not (isinstance(self.suffix_df, (bool))):
-            suffix_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
+            candidate_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
             print("st")
-            print(suffix_targets)
+            print(candidate_targets)
 
-        candidate_targets = targets_df[(targets_df.name.isin(self.prefix_df.name)) | (targets_df.name.isin(self.suffix_df.name))] #previously sub_targ
+        # candidate_targets = targets_df[(targets_df.name.isin(self.prefix_df.name)) | (targets_df.name.isin(self.suffix_df.name))] #previously sub_targ
         # the original above code assumes that the prefix is present, changed to require one of suffixes or prefixes
 
-        print(f"Candidates: {candidate_targets}")
+        print("Candidates identified above")
 
         #get the best alignments per target identified (previously sub_prefixes and sub_suffixes)
         candidate_prefix_aligns = self.prefix_df.groupby('name').head(1).reset_index()
