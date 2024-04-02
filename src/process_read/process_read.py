@@ -250,6 +250,9 @@ class Process_Read:
 
 
         print("Assigning a target for a read")
+        print(self.prefix_df)
+        print(self.suffix_df)
+        print(targets_df)
 
         #check if any alignemnts returned
         if isinstance(self.prefix_df, (bool)) and isinstance(self.suffix_df, (bool)): #no alignments
@@ -280,14 +283,15 @@ class Process_Read:
             # prefix and suffix present and in right orientation
             if oriented:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info, suffix_info)
-                print()
+                print(self.get_align_info(row, prefix_info, suffix_info))
             # only prefix present
             elif read_status[1] == 1:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info, False)
+                print(self.get_align_info(row, prefix_info, False))
             # only suffix present
             elif read_status[1] == 2:
                 self.target_info[row.name] = self.get_align_info(row, False, suffix_info)
-
+                print(self.get_align_info(row, False, suffix_info))
 
     def run_viterbi(self,hmm_file,rev_hmm_file,hidden_states,rev_states,out,build_pre, prefix_idx,output_labelled_seqs):
         '''
