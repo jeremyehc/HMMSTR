@@ -253,7 +253,7 @@ class Process_Read:
 
         #check if any alignemnts returned
         if isinstance(self.prefix_df, (bool)) and isinstance(self.suffix_df, (bool)): #no alignments
-            print("no_alignments")
+            print("missing prefix and suffix")
             return False #need to decide on final returns for this function still
 
         #subset to only get targets that aligned according to mappy
@@ -267,17 +267,20 @@ class Process_Read:
         candidate_prefix_aligns = self.prefix_df.groupby('name').head(1).reset_index()
         candidate_suffix_aligns = self.suffix_df.groupby('name').head(1).reset_index()
         self.target_info = {}
+
         #filter candidates that aren't in a compatible orientation and save final candidates
         for row in candidate_targets.itertuples():
+            print(f"Target row: {row}")
             prefix_info =  candidate_prefix_aligns[candidate_prefix_aligns.name == row.name].reset_index()
             suffix_info = candidate_suffix_aligns[candidate_suffix_aligns.name == row.name].reset_index()
             #save valid regions' attributes
             # keep status of read
             oriented, read_status = self.keep_region(prefix_info, suffix_info)
-            print(f"Result of keep region {read_status}")
+            print(f"Oriented and result of keep region: {oriented}, {read_status}")
             # prefix and suffix present and in right orientation
             if oriented:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info, suffix_info)
+                print()
             # only prefix present
             elif read_status[1] == 1:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info, False)
