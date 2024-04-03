@@ -329,7 +329,7 @@ class Process_Read:
                 print("read status 1")
                 self.target_info[row.name] = self.get_align_info(row, prefix_info=prefix_info, suffix_info=False)
                 print("pass")
-                print(self.get_align_info(self.target_info[row.name]))
+                print(self.target_info[row.name])
                 print("pass2")
             # only suffix present
             elif read_status == 2:
