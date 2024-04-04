@@ -263,17 +263,17 @@ class Process_Read:
         # print(f"aligning targets for read: {self.seq}") # reaches this step with no issues
 
 
-        print("Assigning a target for a read")
+        print(f"Assigning a target for a read: {self.read_id}")
         print(self.prefix_df)
         print(self.suffix_df)
         print(targets_df)
 
         #check if any alignemnts returned
         if isinstance(self.prefix_df, (bool)) and isinstance(self.suffix_df, (bool)): #no alignments
-            print("missing prefix and suffix")
+            print("Missing prefix and suffix")
             return False #need to decide on final returns for this function still
 
-        print("Prefix or suffix present")
+        print(f"Prefix or suffix present in read {self.read_id}")
 
         #subset to only get targets that aligned according to mappy
         # candidate targets are targets where th name is present in eitehr prefix or suffix dictionary
@@ -283,17 +283,17 @@ class Process_Read:
 
         if not (isinstance(self.prefix_df, (bool))):
             candidate_targets = targets_df[targets_df.name.isin(self.prefix_df.name)]
-            print("pt")
+            print("Prefix present")
             print(candidate_targets)
         elif not (isinstance(self.suffix_df, (bool))):
             candidate_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
-            print("st")
+            print("Only suffix present")
             print(candidate_targets)
 
         # candidate_targets = targets_df[(targets_df.name.isin(self.prefix_df.name)) | (targets_df.name.isin(self.suffix_df.name))] #previously sub_targ
         # the original above code assumes that the prefix is present, changed to require one of suffixes or prefixes
 
-        print("Candidates identified above")
+        print(f"Candidates identified above for read: {self.read_id}")
 
         #get the best alignments per target identified (previously sub_prefixes and sub_suffixes)
         if not (isinstance(self.prefix_df, (bool))):
@@ -336,7 +336,7 @@ class Process_Read:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info=False, suffix_info=suffix_info)
                 print(self.get_align_info(self.target_info[row.name]))
 
-            print(self.target_info[row.name])
+            print(f"Read:{self.read_id} matches target: {self.target_info[row.name]}")
 
     def run_viterbi(self,hmm_file,rev_hmm_file,hidden_states,rev_states,out,build_pre, prefix_idx,output_labelled_seqs):
         '''
