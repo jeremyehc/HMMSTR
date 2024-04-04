@@ -219,6 +219,7 @@ class Process_Read:
             #ADDED record subset coords so we can calculate repeat coordinates
             info["subset_start"] = 0
             info["subset_end"] = len(self.seq) -1
+            print(f"finished subsetting with full read for {self.read_id}")
             return info
 
         # start positions + length of start is less than 400 and end length is less than full sequnece length: subset
@@ -324,7 +325,7 @@ class Process_Read:
             # prefix and suffix present and in right orientation
             if oriented:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info, suffix_info)
-                print(self.get_align_info(self.target_info[row.name]))
+                print(self.target_info[row.name])
             # only prefix present
             elif read_status == 1:
                 print("read status 1")
@@ -335,7 +336,7 @@ class Process_Read:
             # only suffix present
             elif read_status == 2:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info=False, suffix_info=suffix_info)
-                print(self.get_align_info(self.target_info[row.name]))
+                print(self.target_info[row.name])
 
             print(f"Read:{self.read_id} matches target: {self.target_info[row.name]}")
 
