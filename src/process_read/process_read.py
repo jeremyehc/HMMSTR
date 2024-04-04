@@ -264,9 +264,9 @@ class Process_Read:
 
 
         print(f"Assigning a target for a read: {self.read_id}")
-        print(self.prefix_df)
-        print(self.suffix_df)
-        print(targets_df)
+        print(f"Prefix for {self.read_id}: {self.prefix_df}")
+        print(f"suffix for {self.read_id}: {self.suffix_df}")
+        print(f"{self.read_id}: input: {targets_df}")
 
         #check if any alignemnts returned
         if isinstance(self.prefix_df, (bool)) and isinstance(self.suffix_df, (bool)): #no alignments
@@ -277,8 +277,9 @@ class Process_Read:
 
         #subset to only get targets that aligned according to mappy
         # candidate targets are targets where th name is present in eitehr prefix or suffix dictionary
-
+        print("Prefix missing:")
         print(isinstance(self.prefix_df, (bool)))
+        print("Suffix missing:")
         print(isinstance(self.suffix_df, (bool)))
 
         if not (isinstance(self.prefix_df, (bool))):
