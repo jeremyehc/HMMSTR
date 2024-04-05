@@ -378,6 +378,8 @@ class Process_Read:
         # iterate through all targets saved in the class
         for name in self.target_info.keys():
 
+            read_reverse = False
+
             #choose hmm to use based on strand of target
             curr_hmm_file = build_pre + "_" + name + hmm_file
             curr_rev_file = build_pre + "_" + name + rev_hmm_file
@@ -388,6 +390,7 @@ class Process_Read:
                 if self.read_status == 2:
                     self.target_info[name]["subset"] = rev_comp(self.seq)
                     print(f"Running Reverse viterbi for {self.read_id}")
+                    read_reverse = True
                     curr_hmm = curr_rev_file
                     curr_hidden_states_rev_file = open(build_pre + "_" + name + rev_states,'r')
                     curr_states = curr_hidden_states_rev_file.readline().split(".")
@@ -402,6 +405,7 @@ class Process_Read:
             # REVERSE STRAND MISSING SUFFIX:
             elif self.read_status == 1:
                 self.target_info[name]["subset"] = rev_comp(self.seq)
+                read_reverse = True
                 print(f"Running Forward viterbi for {self.read_id}")
                 curr_hmm = curr_hmm_file
                 curr_hidden_states_file = open(build_pre + "_" + name + hidden_states,'r')
@@ -434,7 +438,12 @@ class Process_Read:
             likelihood, sub_labels,repeats,context, final_repeat_like, repeat_start, repeat_end = calc_likelihood(vit_out, pointers,labeled_seq, curr_states, self.target_info[name]["subset"], self.target_info[name]["subset_start"],self.target_info[name]["subset_end"])
             #save state labels for KMeans method, if time we can figure out how to do this without saving a file
             label_file = open(out+"_"+ name + "_labeled_seqs.txt","a")
-            label_file.write(self.read_id + "\t" +".".join(labeled_seq)+"\n")
+
+            # reverse states order if needed to reverse sequence
+            if read_reverse == True:
+                label_file.write(self.read_id + "\t" +".".join(labeled_seq[::-1])+"\n")
+            else:
+                label_file.write(self.read_id + "\t" +".".join(labeled_seq)+"\n")
             label_file.close()
             count = count_repeats(labeled_seq,pointers,repeat_len,self.target_info[name]["subset"])
             score = self.target_info[name]["prefix_mapq"] + self.target_info[name]["suffix_mapq"]
