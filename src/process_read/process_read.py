@@ -13,6 +13,8 @@ class Process_Read:
     def __init__(self, header, seq, cutoff=30, mode = "map-ont", out = ".", k = None, w = None, use_full_seq = False):
         self.read_id = header.split(" ")[0][1:]
         self.seq = seq
+        # 0 = no align, 1 = prefix only, 2 = suffix only, 3 = both
+        self.read_status = 4
         # mapq cutoff
         self.cutoff = cutoff
         self.mode = mode
@@ -104,6 +106,7 @@ class Process_Read:
         if not isinstance(prefix_info, (bool)) and not isinstance(suffix_info, (bool)):
             if len(suffix_info.index) != 0 and len(prefix_info.index) != 0:
                 # check alignments are on the same strand
+                self.read_status = 3
                 if prefix_info.strand[0] == suffix_info.strand[0]: 
                     return(True,3)
                 else:
@@ -111,12 +114,15 @@ class Process_Read:
                     return(False,3)
         elif isinstance(prefix_info, (bool)) and isinstance(suffix_info, (bool)):
         # neither aligned
+            self.read_status = 0
             return(False, 0)
         # just prefix aligned
         elif not isinstance(prefix_info, (bool)):
+            self.read_status = 1
             return(False, 1)
         # suffix aligned
         else:
+            self.read_status = 2
             return(False, 2)
         
     def get_align_info(self, row, prefix_info, suffix_info):
@@ -133,6 +139,10 @@ class Process_Read:
         ----------------------------------------------------------------------------------------------------
         info: dictionary. Dictionary of alignment and subset information for the current read
         '''
+
+        if self.read_id == 4:
+            raise Exception("INVALID READ STATUS: READ STATUS NOT ASSIGNED")
+
         #dictionary of info for current target
         info = {}
         #may or may not want these in the dictionary, seems like a good idea to keep them together
@@ -156,7 +166,8 @@ class Process_Read:
         print(info)
 
         # both prefix and suffix info are present
-        if (info["prefix_align_length"] > 0) and (info["suffix_align_length"] > 0):
+        # if (info["prefix_align_length"] > 0) and (info["suffix_align_length"] > 0):
+        if self.read_status == 3:
         # get strand and start and end coordinates
             print("prefix and suffix present in info")
             if prefix_info.strand[0] == 1 and suffix_info.strand[0] == 1:
@@ -179,7 +190,8 @@ class Process_Read:
 
         # A bit of confusion regarding strandedness here: review this for correctness
         # only prefix present
-        elif info["prefix_align_length"] > 0:
+        # elif info["prefix_align_length"] > 0:
+        elif self.read_status == 1:
             print("missing suffix")
             info["align_start"] = prefix_info.prefix_start[0]
             info["align_end"] = prefix_info.prefix_end[0]
@@ -321,24 +333,22 @@ class Process_Read:
             # keep status of read
             print("checking read status")
             oriented, read_status = self.keep_region(prefix_info, suffix_info)
-            print(f"Oriented and result of keep region: {oriented}, {read_status}")
+            print(f"Oriented and result of keep region: {oriented}, {read_status}, {self.read_status}")
             # prefix and suffix present and in right orientation
             if oriented:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info, suffix_info)
-                print(self.target_info[row.name])
+
             # only prefix present
             elif read_status == 1:
                 print("read status 1")
                 self.target_info[row.name] = self.get_align_info(row, prefix_info=prefix_info, suffix_info=False)
                 print("pass")
-                print(self.target_info[row.name])
                 print("pass2")
             # only suffix present
             elif read_status == 2:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info=False, suffix_info=suffix_info)
-                print(self.target_info[row.name])
 
-            print(f"Read:{self.read_id} matches target: {self.target_info[row.name]}")
+            print(f"Read:{self.read_id} matches target: {self.target_info[row.name]['repeat']}")
 
     def run_viterbi(self,hmm_file,rev_hmm_file,hidden_states,rev_states,out,build_pre, prefix_idx,output_labelled_seqs):
         '''
