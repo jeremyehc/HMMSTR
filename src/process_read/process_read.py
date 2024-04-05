@@ -2,6 +2,7 @@ import pandas as pd
 import mappy
 from os.path import exists
 from HMMSTR_utils.HMMSTR_utils import seq2int
+from HMMSTR_utils.HMMSTR_utils import rev_comp
 from subprocess import run, PIPE
 from importlib_resources import files
 
@@ -376,26 +377,51 @@ class Process_Read:
         
         # iterate through all targets saved in the class
         for name in self.target_info.keys():
+
             #choose hmm to use based on strand of target
             curr_hmm_file = build_pre + "_" + name + hmm_file
             curr_rev_file = build_pre + "_" + name + rev_hmm_file
+
+            # FORWARD STRAND
             if self.target_info[name]["strand"] == "forward":
+                # forward but no prefix should be reversed
+                if self.read_status == 2:
+                    self.target_info[name]["subset"] = rev_comp(self.seq)
+                    print(f"Running Reverse viterbi for {self.read_id}")
+                    curr_hmm = curr_rev_file
+                    curr_hidden_states_rev_file = open(build_pre + "_" + name + rev_states,'r')
+                    curr_states = curr_hidden_states_rev_file.readline().split(".")
+                    curr_hidden_states_rev_file.close()
+                else:
+                    print(f"Running Forward viterbi for {self.read_id}")
+                    curr_hmm = curr_hmm_file
+                    curr_hidden_states_file = open(build_pre + "_" + name + hidden_states,'r')
+                    curr_states = curr_hidden_states_file.readline().split(".")
+                    curr_hidden_states_file.close()
+
+            # REVERSE STRAND MISSING SUFFIX:
+            elif self.read_status == 1:
+                self.target_info[name]["subset"] = rev_comp(self.seq)
                 print(f"Running Forward viterbi for {self.read_id}")
                 curr_hmm = curr_hmm_file
                 curr_hidden_states_file = open(build_pre + "_" + name + hidden_states,'r')
                 curr_states = curr_hidden_states_file.readline().split(".")
                 curr_hidden_states_file.close()
+            
+            # REVERSE STRAND WITH SUFFIX
             else:
                 print(f"Running Reverse viterbi for {self.read_id}")
                 curr_hmm = curr_rev_file
                 curr_hidden_states_rev_file = open(build_pre + "_" + name + rev_states,'r')
                 curr_states = curr_hidden_states_rev_file.readline().split(".")
                 curr_hidden_states_rev_file.close()
+
             #convert seqeunce to numeric so it is compatible with the C code
             numeric_seq = str(seq2int(self.target_info[name]["subset"].upper()))
             T = str(len(self.target_info[name]["subset"]))
             repeat_len = len(self.target_info[name]["repeat"])
             repeat_len_str = str(repeat_len)
+            # what is this for?
             prefix_idx_str = str(3*prefix_idx + 1)
             test_hmm_cython_path = files('c_files').joinpath('test_hmm_cython.py')
             command = ['python',test_hmm_cython_path,curr_hmm,T,numeric_seq, repeat_len_str, prefix_idx_str]
@@ -419,8 +445,6 @@ class Process_Read:
             #output labelled sequence to context file for given target if output_labelled_seqs is set
             if output_labelled_seqs:
                 print_labelled(self.read_id,self.target_info[name]["strand"],sub_labels,context,pointers,out + "_labelled_seqs/"+name+"_context_labeled.txt")
-        print("\n")
-        print("\n")
         return True
 
         
