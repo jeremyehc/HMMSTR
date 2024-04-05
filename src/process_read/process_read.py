@@ -370,11 +370,13 @@ class Process_Read:
             curr_hmm_file = build_pre + "_" + name + hmm_file
             curr_rev_file = build_pre + "_" + name + rev_hmm_file
             if self.target_info[name]["strand"] == "forward":
+                print(f"Running Forward viterbi for {self.read_id}")
                 curr_hmm = curr_hmm_file
                 curr_hidden_states_file = open(build_pre + "_" + name + hidden_states,'r')
                 curr_states = curr_hidden_states_file.readline().split(".")
                 curr_hidden_states_file.close()
             else:
+                print(f"Running Reverse viterbi for {self.read_id}")
                 curr_hmm = curr_rev_file
                 curr_hidden_states_rev_file = open(build_pre + "_" + name + rev_states,'r')
                 curr_states = curr_hidden_states_rev_file.readline().split(".")
