@@ -419,6 +419,8 @@ class Process_Read:
             #output labelled sequence to context file for given target if output_labelled_seqs is set
             if output_labelled_seqs:
                 print_labelled(self.read_id,self.target_info[name]["strand"],sub_labels,context,pointers,out + "_labelled_seqs/"+name+"_context_labeled.txt")
+        print("\n")
+        print("\n")
         return True
 
         
