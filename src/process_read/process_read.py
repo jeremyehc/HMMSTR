@@ -219,8 +219,8 @@ class Process_Read:
 
             else: #reverse
                 info["strand"] = "reverse"
-                info["end_length"] = info["suffix_align_length"]
-                info["start_length"] = 0
+                info["end_length"] = 0
+                info["start_length"] = info["suffix_align_length"]
 
 
         print("prior to return")
@@ -235,26 +235,56 @@ class Process_Read:
             print(f"finished subsetting with full read for {self.read_id}")
             return info
 
+
+
+        start_extension = info["align_start"] + info["start_length"] - 400
+        end_extension = info["align_end"]-info["end_length"]+400
+
+
+
+
         # start positions + length of start is less than 400 and end length is less than full sequnece length: subset
+        # only 400 from end of repeat is possible
         if info["align_start"] + info["start_length"] - 400 < 0 and info["align_end"]-info["end_length"]+400 < len(self.seq):
-            info["subset"] = self.seq[info["align_start"] + info["start_length"] - 50: info["align_end"]-info["end_length"]+400]
-            info["subset_start"] = info["align_start"] + info["start_length"] - 50
-            info["subset_end"] = info["align_end"]-info["end_length"]+400 -1
+            # if prefix is present
+            if info["prefix_align_length"] > 0:
+                info["subset"] = self.seq[info["align_start"] + info["start_length"] - 50: info["align_end"]-info["end_length"]+400]
+                info["subset_start"] = info["align_start"] + info["start_length"] - 50
+                info["subset_end"] = info["align_end"]-info["end_length"]+400 -1
 
+            # no prefix, dont subset start
+            else:
+                info["subset"] = self.seq[:info["align_end"]-info["end_length"]+400]
+                info["subset_start"] = 0
+                info["subset_end"] = info["align_end"]-info["end_length"]+400 -1
+
+        
+        #  400 from start of repeat is possible
         elif info["align_start"] + info["start_length"] - 400 > 0 and info["align_end"]-info["end_length"]+400 > len(self.seq):
-            info["subset"] = self.seq[info["align_start"] + info["start_length"] - 400: info["align_end"]-info["end_length"]+50]
-            info["subset_start"] = info["align_start"] + info["start_length"] - 400
-            info["subset_end"] = info["align_end"]-info["end_length"]+50 -1
+            if info["suffix_align_length"] > 0:
+                info["subset"] = self.seq[info["align_start"] + info["start_length"] - 400: info["align_end"]-info["end_length"]+50]
+                info["subset_start"] = info["align_start"] + info["start_length"] - 400
+                info["subset_end"] = info["align_end"]-info["end_length"]+50 -1
+            # no suffix
+            else:
+                info["subset"] = self.seq[:info["align_end"]-info["end_length"]+400]
+                info["subset_start"] = info["align_start"] + info["start_length"] - 400
+                info["subset_end"] = len(self.seq)
 
+        #neiher is possible
         elif info["align_start"] + info["start_length"] - 400 < 0 and info["align_end"]-info["end_length"]+400 > len(self.seq):
+            # if subsetting 50 from start of repeat is not possible
             if info["align_start"] + info["start_length"] - 50 < 0 and info["align_end"]-info["end_length"]+50 > len(self.seq):
                 info["subset"] = self.seq[info["align_start"] : info["align_end"]]
                 info["subset_start"] = info["align_start"]
                 info["subset_end"] = info["align_end"]-1
+            # subset 50 from each end
             else:
                 info["subset"] = self.seq[info["align_start"] + info["start_length"] - 50: info["align_end"]-info["end_length"]+50] #switch back to 50 if this doesnt help
                 info["subset_start"] = info["align_start"] + info["start_length"] - 50
                 info["subset_end"] = info["align_end"]-info["end_length"]+50 -1
+        
+        # subset both ends
         else:
             info["subset"] = self.seq[info["align_start"] + info["start_length"] - 400: info["align_end"]-info["end_length"]+400]
             info["subset_start"] = info["align_start"] + info["start_length"] - 400

@@ -130,7 +130,14 @@ class ProfileHMM:
             I[item] = 0.0
 
         #need to test probabilities here
-        I['G1'] = 1.0
+        I['G1'] = 0.50
+        
+        # Transition from start to repeat for non through reads starting in repeat
+        for pos in range(len(repeat)):
+            # Enter repeat
+            I['RM' + str(pos)] = 0.48 # using pseudocount
+            I['RI' + str(pos)] = 0.01 # using pseudocount
+            I['RD' + str(pos)] = 0.01 # using pseudocount
 
         #initialize emission probabilities
         E = self.get_emission(E, prefix, repeat, suffix,repeat_probs)
