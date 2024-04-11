@@ -494,6 +494,8 @@ class Process_Read:
             #save state labels for KMeans method, if time we can figure out how to do this without saving a file
             label_file = open(out+"_"+ name + "_labeled_seqs.txt","a")
 
+            print("prior to reverse check")
+
             # reverse states order if needed to reverse sequence
             if read_reverse == True:
                 label_file.write(self.read_id + "\t" +".".join(labeled_seq[::-1])+"\n")
