@@ -228,6 +228,9 @@ class Process_Read:
             print(f"finished subsetting with full read for {self.read_id}")
             return info
 
+
+
+
         start_extend_400 = info["align_start"] + info["start_length"] - 400
         end_extend_400 = info["align_end"] - info["end_length"] + 400
         start_extend_50 = info["align_start"] + info["start_length"] - 50
@@ -236,22 +239,30 @@ class Process_Read:
         # cannot extend prefix
         if start_extend_400 < 0:
             if info["prefix_align_length"] > 0:
+                print('subset 50 from start')
                 info["subset_start"] = start_extend_50
             else:
+                print("no subset at start")
                 info["subset_start"] = 0
         else:
             info["subset_start"] = start_extend_400
+            print("extend start by 400")
 
         # cannot extend suffix
         if end_extend_400 > len(self.seq):
             if info["suffix_align_length"] > 0:
+                print("extend suffix by 50")
                 info["subset_end"] = end_extend_50 -1
             else:
                 info["subset_end"] = len(self.seq)
+                print("no subset at end")
         else:
             info["subset_end"] = end_extend_400 -1
+            print("extend end by 400")
 
         info["subset"] = self.seq[info["subset_start"]: info["subset_end"] + 1]
+
+        print(info)
 
         '''
 
