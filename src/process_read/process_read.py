@@ -490,11 +490,10 @@ class Process_Read:
 
             #methods are either static in this class or will be imported by name
             labeled_seq, pointers,MLE = label_states(vit_out, curr_states)
+            
             likelihood, sub_labels,repeats,context, final_repeat_like, repeat_start, repeat_end = calc_likelihood(vit_out, pointers,labeled_seq, curr_states, self.target_info[name]["subset"], self.target_info[name]["subset_start"],self.target_info[name]["subset_end"])
             #save state labels for KMeans method, if time we can figure out how to do this without saving a file
             label_file = open(out+"_"+ name + "_labeled_seqs.txt","a")
-
-            print("prior to reverse check")
 
             # reverse states order if needed to reverse sequence
             if read_reverse == True:
@@ -503,10 +502,15 @@ class Process_Read:
                 label_file.write(self.read_id + "\t" +".".join(labeled_seq)+"\n")
             label_file.close()
 
+            print("Checking arguments before count")
+            print(labeled_seq)
+            print(pointers)
+            print(repeat_len)
+            print(self.target_info[name]["subset"])
             print("before count")
 
             count = count_repeats(labeled_seq,pointers,repeat_len,self.target_info[name]["subset"])
-            
+
             print(f"count: {count}")
 
             score = self.target_info[name]["prefix_mapq"] + self.target_info[name]["suffix_mapq"]
