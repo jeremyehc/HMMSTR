@@ -163,8 +163,6 @@ class Process_Read:
         else: 
             info["suffix_align_length"] = 0
 
-        print("info here")
-        print(info)
 
         # both prefix and suffix info are present
         # if (info["prefix_align_length"] > 0) and (info["suffix_align_length"] > 0):
@@ -187,7 +185,6 @@ class Process_Read:
             #record mapqs
             info["prefix_mapq"] = prefix_info.prefix_mapq[0]
             info["suffix_mapq"] = suffix_info.suffix_mapq[0]
-
 
         # A bit of confusion regarding strandedness here: review this for correctness
         # only prefix present
@@ -222,10 +219,6 @@ class Process_Read:
                 info["end_length"] = 0
                 info["start_length"] = info["suffix_align_length"]
 
-
-        print("prior to return")
-        print(info)
-
         # Review how to do subsetting with only prefix or suffix
         if self.use_full_seq:
             info["subset"] = self.seq
@@ -234,8 +227,6 @@ class Process_Read:
             info["subset_end"] = len(self.seq) -1
             print(f"finished subsetting with full read for {self.read_id}")
             return info
-
-
 
         start_extend_400 = info["align_start"] + info["start_length"] - 400
         end_extend_400 = info["align_end"] - info["end_length"] + 400
@@ -372,7 +363,6 @@ class Process_Read:
 
         #filter candidates that aren't in a compatible orientation and save final candidates
         for row in candidate_targets.itertuples():
-            print(f"Target row: {row}")
             if not (isinstance(self.prefix_df, (bool))):
                 prefix_info =  candidate_prefix_aligns[candidate_prefix_aligns.name == row.name].reset_index()
             else:
@@ -394,10 +384,7 @@ class Process_Read:
 
             # only prefix present
             elif read_status == 1:
-                print("read status 1")
                 self.target_info[row.name] = self.get_align_info(row, prefix_info=prefix_info, suffix_info=False)
-                print("pass")
-                print("pass2")
             # only suffix present
             elif read_status == 2:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info=False, suffix_info=suffix_info)
@@ -439,6 +426,7 @@ class Process_Read:
 
             # FORWARD STRAND
             if self.target_info[name]["strand"] == "forward":
+                '''
                 # forward but no prefix should be reversed
                 if self.read_status == 2:
                     self.target_info[name]["subset"] = rev_comp(self.seq)
@@ -448,13 +436,23 @@ class Process_Read:
                     curr_hidden_states_rev_file = open(build_pre + "_" + name + rev_states,'r')
                     curr_states = curr_hidden_states_rev_file.readline().split(".")
                     curr_hidden_states_rev_file.close()
-                else:
-                    print(f"Running Forward viterbi for {self.read_id}")
-                    curr_hmm = curr_hmm_file
-                    curr_hidden_states_file = open(build_pre + "_" + name + hidden_states,'r')
-                    curr_states = curr_hidden_states_file.readline().split(".")
-                    curr_hidden_states_file.close()
+                '''
+                
+                print(f"Running Forward viterbi for {self.read_id}")
+                curr_hmm = curr_hmm_file
+                curr_hidden_states_file = open(build_pre + "_" + name + hidden_states,'r')
+                curr_states = curr_hidden_states_file.readline().split(".")
+                curr_hidden_states_file.close()
 
+            # REVERSE STRAND WITH SUFFIX
+            else:
+                print(f"Running Reverse viterbi for {self.read_id}")
+                curr_hmm = curr_rev_file
+                curr_hidden_states_rev_file = open(build_pre + "_" + name + rev_states,'r')
+                curr_states = curr_hidden_states_rev_file.readline().split(".")
+                curr_hidden_states_rev_file.close()
+
+            '''
             # REVERSE STRAND MISSING SUFFIX:
             elif self.read_status == 1:
                 self.target_info[name]["subset"] = rev_comp(self.seq)
@@ -464,14 +462,7 @@ class Process_Read:
                 curr_hidden_states_file = open(build_pre + "_" + name + hidden_states,'r')
                 curr_states = curr_hidden_states_file.readline().split(".")
                 curr_hidden_states_file.close()
-            
-            # REVERSE STRAND WITH SUFFIX
-            else:
-                print(f"Running Reverse viterbi for {self.read_id}")
-                curr_hmm = curr_rev_file
-                curr_hidden_states_rev_file = open(build_pre + "_" + name + rev_states,'r')
-                curr_states = curr_hidden_states_rev_file.readline().split(".")
-                curr_hidden_states_rev_file.close()
+            '''
 
             #convert seqeunce to numeric so it is compatible with the C code
             numeric_seq = str(seq2int(self.target_info[name]["subset"].upper()))
