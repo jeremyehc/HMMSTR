@@ -148,6 +148,8 @@ def count_repeats(labeled_seq, pointers,repeat_len):
     # if missing suffix count until the end of the read
     if pointers["S"] == False:
         repeat_region = labeled_seq[pointers["R"]:]
+    elif pointers["P"] == False:
+        repeat_region = labeled_seq[:pointers["S"]]
     else:
         repeat_region = labeled_seq[pointers["R"]:pointers["S"]]
 
