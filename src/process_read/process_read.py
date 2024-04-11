@@ -500,12 +500,18 @@ class Process_Read:
             else:
                 label_file.write(self.read_id + "\t" +".".join(labeled_seq)+"\n")
             label_file.close()
-            count = count_repeats(labeled_seq,pointers,repeat_len,self.target_info[name]["subset"])
-            score = self.target_info[name]["prefix_mapq"] + self.target_info[name]["suffix_mapq"]
 
-            out_file = open(out+"_"+name+"_counts.txt","a")
+            count = count_repeats(labeled_seq,pointers,repeat_len,self.target_info[name]["subset"])
+            print(f"count: {count}")
+
+            score = self.target_info[name]["prefix_mapq"] + self.target_info[name]["suffix_mapq"]
+            print(f"score: {score}")
+
+            out_file = open(out + "_" + name + "_counts.txt","a")
+            print(out_file)
             out_file.write(self.read_id + " " + self.target_info[name]["strand"] + " "+ str(score) + " " + str(MLE) + " " + str(likelihood)+ " " + str(final_repeat_like) + " " + str(repeat_start) + " "+ str(repeat_end) + " "+ str(self.target_info[name]["align_start"]) + " "+str(self.target_info[name]["align_end"])+ " " + str(count) + "\n")
             out_file.close()
+
             #output labelled sequence to context file for given target if output_labelled_seqs is set
             if output_labelled_seqs:
                 print_labelled(self.read_id,self.target_info[name]["strand"],sub_labels,context,pointers,out + "_labelled_seqs/"+name+"_context_labeled.txt")
