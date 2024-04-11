@@ -162,7 +162,7 @@ def count_repeats(labeled_seq, pointers,repeat_len):
             adjusted_length -= 1
 
     # use the modulo operator to count leftover states when read ends, then remove them to find repeat length
-    if pointers["S"] == False:
+    if (pointers["S"] == False) or (pointers["P"] == False):
         remainder = adjusted_length%repeat_len
         adjusted_length -= remainder
 

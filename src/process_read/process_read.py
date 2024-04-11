@@ -502,11 +502,6 @@ class Process_Read:
                 label_file.write(self.read_id + "\t" +".".join(labeled_seq)+"\n")
             label_file.close()
 
-            print("Checking arguments before count")
-            print(labeled_seq)
-            print(pointers)
-            print(repeat_len)
-            print(self.target_info[name]["subset"])
             print("before count")
 
             # removed ,self.target_info[name]["subset"] argument
@@ -514,7 +509,13 @@ class Process_Read:
 
             print(f"count: {count}")
 
-            score = self.target_info[name]["prefix_mapq"] + self.target_info[name]["suffix_mapq"]
+            if self.read_status == 3:
+                score = self.target_info[name]["prefix_mapq"] + self.target_info[name]["suffix_mapq"]
+            elif self.read_status == 2: # Suffix only
+                score = self.target_info[name]["suffix_mapq"]
+            else:
+                score = self.target_info[name]["prefix_mapq"]
+            
             print(f"score: {score}")
 
             out_file = open(out + "_" + name + "_counts.txt","a")
