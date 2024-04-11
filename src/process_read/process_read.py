@@ -503,7 +503,10 @@ class Process_Read:
                 label_file.write(self.read_id + "\t" +".".join(labeled_seq)+"\n")
             label_file.close()
 
+            print("before count")
+
             count = count_repeats(labeled_seq,pointers,repeat_len,self.target_info[name]["subset"])
+            
             print(f"count: {count}")
 
             score = self.target_info[name]["prefix_mapq"] + self.target_info[name]["suffix_mapq"]
