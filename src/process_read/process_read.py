@@ -238,7 +238,7 @@ class Process_Read:
 
         # cannot extend prefix
         if start_extend_400 < 0:
-            if info["prefix_align_length"] > 0:
+            if info["start_length"] > 0:
                 print('subset 50 from start')
                 info["subset_start"] = start_extend_50
             else:
@@ -250,7 +250,7 @@ class Process_Read:
 
         # cannot extend suffix
         if end_extend_400 > len(self.seq):
-            if info["suffix_align_length"] > 0:
+            if info["end_length"] > 0:
                 print("extend suffix by 50")
                 info["subset_end"] = end_extend_50 -1
             else:
