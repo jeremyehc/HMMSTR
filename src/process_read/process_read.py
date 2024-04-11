@@ -168,7 +168,6 @@ class Process_Read:
         # if (info["prefix_align_length"] > 0) and (info["suffix_align_length"] > 0):
         if self.read_status == 3:
         # get strand and start and end coordinates
-            print("prefix and suffix present in info")
             if prefix_info.strand[0] == 1 and suffix_info.strand[0] == 1:
                 info["strand"] = "forward"
                 info["align_start"] = prefix_info.prefix_start[0]
@@ -190,7 +189,6 @@ class Process_Read:
         # only prefix present
         # elif info["prefix_align_length"] > 0:
         elif self.read_status == 1:
-            print("missing suffix")
             info["align_start"] = prefix_info.prefix_start[0]
             info["align_end"] = prefix_info.prefix_end[0]
             info["prefix_mapq"] = prefix_info.prefix_mapq[0]
@@ -227,7 +225,6 @@ class Process_Read:
             #ADDED record subset coords so we can calculate repeat coordinates
             info["subset_start"] = 0
             info["subset_end"] = len(self.seq) -1
-            print(f"finished subsetting with full read for {self.read_id}")
             return info
 
 
@@ -241,30 +238,22 @@ class Process_Read:
         # cannot extend prefix
         if start_extend_400 < 0:
             if info["start_length"] > 0:
-                print('subset 50 from start')
                 info["subset_start"] = start_extend_50
             else:
-                print("no subset at start")
                 info["subset_start"] = 0
         else:
             info["subset_start"] = start_extend_400
-            print("extend start by 400")
 
         # cannot extend suffix
         if end_extend_400 > len(self.seq):
             if info["end_length"] > 0:
-                print("extend suffix by 50")
                 info["subset_end"] = end_extend_50 -1
             else:
                 info["subset_end"] = len(self.seq)
-                print("no subset at end")
         else:
             info["subset_end"] = end_extend_400 -1
-            print("extend end by 400")
 
         info["subset"] = self.seq[info["subset_start"]: info["subset_end"] + 1]
-
-        print(info)
 
         '''
 
@@ -334,38 +323,24 @@ class Process_Read:
         # print(f"aligning targets for read: {self.seq}") # reaches this step with no issues
 
 
-        print(f"Assigning a target for a read: {self.read_id}")
-        print(f"Prefix for {self.read_id}: {self.prefix_df}")
-        print(f"suffix for {self.read_id}: {self.suffix_df}")
-        print(f"{self.read_id}: input: {targets_df}")
-
         #check if any alignemnts returned
         if isinstance(self.prefix_df, (bool)) and isinstance(self.suffix_df, (bool)): #no alignments
-            print("Missing prefix and suffix")
             return False #need to decide on final returns for this function still
 
-        print(f"Prefix or suffix present in read {self.read_id}")
+
 
         #subset to only get targets that aligned according to mappy
         # candidate targets are targets where th name is present in eitehr prefix or suffix dictionary
-        print("Prefix missing:")
-        print(isinstance(self.prefix_df, (bool)))
-        print("Suffix missing:")
-        print(isinstance(self.suffix_df, (bool)))
 
         if not (isinstance(self.prefix_df, (bool))):
             candidate_targets = targets_df[targets_df.name.isin(self.prefix_df.name)]
-            print("Prefix present")
-            print(candidate_targets)
+
         elif not (isinstance(self.suffix_df, (bool))):
             candidate_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
-            print("Only suffix present")
-            print(candidate_targets)
+
 
         # candidate_targets = targets_df[(targets_df.name.isin(self.prefix_df.name)) | (targets_df.name.isin(self.suffix_df.name))] #previously sub_targ
         # the original above code assumes that the prefix is present, changed to require one of suffixes or prefixes
-
-        print(f"Candidates identified above for read: {self.read_id}")
 
         #get the best alignments per target identified (previously sub_prefixes and sub_suffixes)
         if not (isinstance(self.prefix_df, (bool))):
@@ -388,9 +363,7 @@ class Process_Read:
             
             #save valid regions' attributes
             # keep status of read
-            print("checking read status")
             oriented, read_status = self.keep_region(prefix_info, suffix_info)
-            print(f"Oriented and result of keep region: {oriented}, {read_status}, {self.read_status}")
             # prefix and suffix present and in right orientation
             if oriented:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info, suffix_info)
@@ -401,8 +374,6 @@ class Process_Read:
             # only suffix present
             elif read_status == 2:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info=False, suffix_info=suffix_info)
-
-            print(f"Read:{self.read_id} matches target: {self.target_info[row.name]['repeat']}")
 
     def run_viterbi(self,hmm_file,rev_hmm_file,hidden_states,rev_states,out,build_pre, prefix_idx,output_labelled_seqs):
         '''
@@ -450,8 +421,7 @@ class Process_Read:
                     curr_states = curr_hidden_states_rev_file.readline().split(".")
                     curr_hidden_states_rev_file.close()
                 '''
-                
-                print(f"Running Forward viterbi for {self.read_id}")
+
                 curr_hmm = curr_hmm_file
                 curr_hidden_states_file = open(build_pre + "_" + name + hidden_states,'r')
                 curr_states = curr_hidden_states_file.readline().split(".")
@@ -459,7 +429,6 @@ class Process_Read:
 
             # REVERSE STRAND WITH SUFFIX
             else:
-                print(f"Running Reverse viterbi for {self.read_id}")
                 curr_hmm = curr_rev_file
                 curr_hidden_states_rev_file = open(build_pre + "_" + name + rev_states,'r')
                 curr_states = curr_hidden_states_rev_file.readline().split(".")
@@ -504,12 +473,9 @@ class Process_Read:
                 label_file.write(self.read_id + "\t" +".".join(labeled_seq)+"\n")
             label_file.close()
 
-            print("before count")
-
             # removed ,self.target_info[name]["subset"] argument
             count = count_repeats(labeled_seq,pointers,repeat_len)
 
-            print(f"count: {count}")
 
             if self.read_status == 3:
                 score = self.target_info[name]["prefix_mapq"] + self.target_info[name]["suffix_mapq"]
@@ -517,11 +483,8 @@ class Process_Read:
                 score = self.target_info[name]["suffix_mapq"]
             else:
                 score = self.target_info[name]["prefix_mapq"]
-            
-            print(f"score: {score}")
 
             out_file = open(out + "_" + name + "_counts.txt","a")
-            print(out_file)
             out_file.write(self.read_id + " " + self.target_info[name]["strand"] + " "+ str(score) + " " + str(MLE) + " " + str(likelihood)+ " " + str(final_repeat_like) + " " + str(repeat_start) + " "+ str(repeat_end) + " "+ str(self.target_info[name]["align_start"]) + " "+str(self.target_info[name]["align_end"])+ " " + str(count) + "\n")
             out_file.close()
 

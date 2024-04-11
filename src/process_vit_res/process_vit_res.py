@@ -16,8 +16,6 @@ def label_states(vit_out, hidden_states):
 
     '''
 
-    print("Entered label states")
-
     labeled_seq = []
     #pointers to record indeces of the start of each part of our model in the read sequence
     pointers = {"P":False, "R":False, "S":False, "G2":False, "D":[], "I":[]}
@@ -54,7 +52,6 @@ def label_states(vit_out, hidden_states):
         if "I" in conversion[seq_list[i]]: #get indeces of all deletions
             pointers["I"].append(i)
 
-    print("finished labeling")
     return labeled_seq, pointers,MLE
 
 
@@ -143,8 +140,6 @@ def count_repeats(labeled_seq, pointers,repeat_len):
 
     '''
 
-    print("entered counts")
-
     # if missing suffix count until the end of the read
     if pointers["S"] == False:
         repeat_region = labeled_seq[pointers["R"]:]
@@ -168,7 +163,6 @@ def count_repeats(labeled_seq, pointers,repeat_len):
 
     #calculate counts from adjusted length, deletions already accounted for in labeled sequence
     count = adjusted_length/repeat_len
-    print(f"count: {count}")
     return count
 
 def print_labelled(read_id,strand,sub_labels,context,pointers,out):
