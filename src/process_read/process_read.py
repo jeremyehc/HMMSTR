@@ -2,6 +2,7 @@ import pandas as pd
 import mappy
 from os.path import exists
 from HMMSTR_utils.HMMSTR_utils import seq2int
+from HMMSTR_utils.HMMSTR_utils import rev_comp
 from subprocess import run, PIPE
 from importlib_resources import files
 
@@ -13,6 +14,8 @@ class Process_Read:
     def __init__(self, header, seq, cutoff=30, mode = "map-ont", out = ".", k = None, w = None, use_full_seq = False):
         self.read_id = header.split(" ")[0][1:]
         self.seq = seq
+        # 0 = no align, 1 = prefix only, 2 = suffix only, 3 = both
+        self.read_status = 4
         # mapq cutoff
         self.cutoff = cutoff
         self.mode = mode
@@ -101,21 +104,26 @@ class Process_Read:
         '''
 
         # check that both contain alignemnts
-        if len(suffix_info.index) != 0 and len(prefix_info.index) != 0:
-            # check alignments are on the same strand
-            if prefix_info.strand[0] == suffix_info.strand[0]: 
-                return(True,3)
-            else:
-                # reverse
-                return(False,3)
+        if not isinstance(prefix_info, (bool)) and not isinstance(suffix_info, (bool)):
+            if len(suffix_info.index) != 0 and len(prefix_info.index) != 0:
+                # check alignments are on the same strand
+                self.read_status = 3
+                if prefix_info.strand[0] == suffix_info.strand[0]: 
+                    return(True,3)
+                else:
+                    # reverse
+                    return(False,3)
+        elif isinstance(prefix_info, (bool)) and isinstance(suffix_info, (bool)):
         # neither aligned
-        if len(suffix_info.index) == 0 and len(prefix_info.index) == 0:
+            self.read_status = 0
             return(False, 0)
         # just prefix aligned
-        elif len(suffix_info.index) == 0 and len(prefix_info.index) != 0:
+        elif not isinstance(prefix_info, (bool)):
+            self.read_status = 1
             return(False, 1)
         # suffix aligned
         else:
+            self.read_status = 2
             return(False, 2)
         
     def get_align_info(self, row, prefix_info, suffix_info):
@@ -132,6 +140,10 @@ class Process_Read:
         ----------------------------------------------------------------------------------------------------
         info: dictionary. Dictionary of alignment and subset information for the current read
         '''
+
+        if self.read_id == 4:
+            raise Exception("INVALID READ STATUS: READ STATUS NOT ASSIGNED")
+
         #dictionary of info for current target
         info = {}
         #may or may not want these in the dictionary, seems like a good idea to keep them together
@@ -142,12 +154,19 @@ class Process_Read:
         # get prefix info if prefix is present
         if not (isinstance(prefix_info, (bool))):
             info["prefix_align_length"] = prefix_info.alignment_length[0]
+        else:
+            info["prefix_align_length"] = 0
+
         # get suffix info if suffix is present
         if not (isinstance(suffix_info, (bool))):
             info["suffix_align_length"] = suffix_info.alignment_length[0]
+        else: 
+            info["suffix_align_length"] = 0
+
 
         # both prefix and suffix info are present
-        if not (isinstance(prefix_info, (bool))) and not (isinstance(prefix_info, (bool))):
+        # if (info["prefix_align_length"] > 0) and (info["suffix_align_length"] > 0):
+        if self.read_status == 3:
         # get strand and start and end coordinates
             if prefix_info.strand[0] == 1 and suffix_info.strand[0] == 1:
                 info["strand"] = "forward"
@@ -166,12 +185,13 @@ class Process_Read:
             info["prefix_mapq"] = prefix_info.prefix_mapq[0]
             info["suffix_mapq"] = suffix_info.suffix_mapq[0]
 
-
         # A bit of confusion regarding strandedness here: review this for correctness
         # only prefix present
-        elif (isinstance(suffix_info, (bool))):
+        # elif info["prefix_align_length"] > 0:
+        elif self.read_status == 1:
             info["align_start"] = prefix_info.prefix_start[0]
             info["align_end"] = prefix_info.prefix_end[0]
+            info["prefix_mapq"] = prefix_info.prefix_mapq[0]
 
             if prefix_info.strand[0] == 1:
                 info["strand"] = "forward"
@@ -187,6 +207,7 @@ class Process_Read:
         else:
             info["align_start"] = suffix_info.suffix_start[0]
             info["align_end"] = suffix_info.suffix_end[0]
+            info["suffix_mapq"] = suffix_info.suffix_mapq[0]
 
             if suffix_info.strand[0] == 1:
                 info["strand"] = "forward"
@@ -195,9 +216,8 @@ class Process_Read:
 
             else: #reverse
                 info["strand"] = "reverse"
-                info["end_length"] = info["suffix_align_length"]
-                info["start_length"] = 0
-
+                info["end_length"] = 0
+                info["start_length"] = info["suffix_align_length"]
 
         # Review how to do subsetting with only prefix or suffix
         if self.use_full_seq:
@@ -207,36 +227,90 @@ class Process_Read:
             info["subset_end"] = len(self.seq) -1
             return info
 
+
+
+
+        start_extend_400 = info["align_start"] + info["start_length"] - 400
+        end_extend_400 = info["align_end"] - info["end_length"] + 400
+        start_extend_50 = info["align_start"] + info["start_length"] - 50
+        end_extend_50 = info["align_end"]-info["end_length"] + 50
+
+        # cannot extend prefix
+        if start_extend_400 < 0:
+            if info["start_length"] > 0:
+                info["subset_start"] = start_extend_50
+            else:
+                info["subset_start"] = 0
+        else:
+            info["subset_start"] = start_extend_400
+
+        # cannot extend suffix
+        if end_extend_400 > len(self.seq):
+            if info["end_length"] > 0:
+                info["subset_end"] = end_extend_50 -1
+            else:
+                info["subset_end"] = len(self.seq)
+        else:
+            info["subset_end"] = end_extend_400 -1
+
+        info["subset"] = self.seq[info["subset_start"]: info["subset_end"] + 1]
+
+        '''
+
         # start positions + length of start is less than 400 and end length is less than full sequnece length: subset
-        if info["align_start"] + info["start_length"] - 400 < 0 and info["align_end"]-info["end_length"]+400 < len(self.seq):
-            info["subset"] = self.seq[info["align_start"] + info["start_length"] - 50: info["align_end"]-info["end_length"]+400]
-            info["subset_start"] = info["align_start"] + info["start_length"] - 50
-            info["subset_end"] = info["align_end"]-info["end_length"]+400 -1
+        # only 400 from end of repeat is possible
+        if start_extend_400 < 0 and end_extend_400 < len(self.seq):
+            # if prefix is present
+            if info["prefix_align_length"] > 0:
+                info["subset"] = self.seq[start_extend_50: end_extend_400]
+                info["subset_start"] = start_extend_50
+                info["subset_end"] = end_extend_400 -1
 
+            # no prefix, dont subset start
+            else:
+                info["subset"] = self.seq[:end_extend_400]
+                info["subset_start"] = 0
+                info["subset_end"] = end_extend_400 -1
+
+        
+        #  400 from start of repeat is possible
         elif info["align_start"] + info["start_length"] - 400 > 0 and info["align_end"]-info["end_length"]+400 > len(self.seq):
-            info["subset"] = self.seq[info["align_start"] + info["start_length"] - 400: info["align_end"]-info["end_length"]+50]
-            info["subset_start"] = info["align_start"] + info["start_length"] - 400
-            info["subset_end"] = info["align_end"]-info["end_length"]+50 -1
+            if info["suffix_align_length"] > 0:
+                info["subset"] = self.seq[info["align_start"] + info["start_length"] - 400: info["align_end"]-info["end_length"]+50]
+                info["subset_start"] = info["align_start"] + info["start_length"] - 400
+                info["subset_end"] = info["align_end"]-info["end_length"]+50 -1
+            # no suffix
+            else:
+                info["subset"] = self.seq[:info["align_end"]-info["end_length"]+400]
+                info["subset_start"] = info["align_start"] + info["start_length"] - 400
+                info["subset_end"] = len(self.seq)
 
+        #neiher is possible
         elif info["align_start"] + info["start_length"] - 400 < 0 and info["align_end"]-info["end_length"]+400 > len(self.seq):
+            # if subsetting 50 from start of repeat is not possible
             if info["align_start"] + info["start_length"] - 50 < 0 and info["align_end"]-info["end_length"]+50 > len(self.seq):
                 info["subset"] = self.seq[info["align_start"] : info["align_end"]]
                 info["subset_start"] = info["align_start"]
                 info["subset_end"] = info["align_end"]-1
+            # subset 50 from each end
             else:
                 info["subset"] = self.seq[info["align_start"] + info["start_length"] - 50: info["align_end"]-info["end_length"]+50] #switch back to 50 if this doesnt help
                 info["subset_start"] = info["align_start"] + info["start_length"] - 50
                 info["subset_end"] = info["align_end"]-info["end_length"]+50 -1
+        
+        # subset both ends
         else:
             info["subset"] = self.seq[info["align_start"] + info["start_length"] - 400: info["align_end"]-info["end_length"]+400]
             info["subset_start"] = info["align_start"] + info["start_length"] - 400
             info["subset_end"] = info["align_end"]-info["end_length"]+400 -1
             
+        '''
+
         if len(info["subset"]) < 1:
             return #return nothing if there is no repeat in this sequence, spurious alignment
         return info
 
-    def assign_targets(self, targets_df):#TODO this would need to change to accomodate only having either suffix or prefix info, I currently filter reads on this
+    def assign_targets(self, targets_df):
         '''
         This function takes alignment results for current process read object and determines which target(s)
         are in results
@@ -249,42 +323,57 @@ class Process_Read:
         # print(f"aligning targets for read: {self.seq}") # reaches this step with no issues
 
 
-        print("Assigning a target for a read")
-
         #check if any alignemnts returned
         if isinstance(self.prefix_df, (bool)) and isinstance(self.suffix_df, (bool)): #no alignments
-            print("no_alignments")
             return False #need to decide on final returns for this function still
+
+
 
         #subset to only get targets that aligned according to mappy
         # candidate targets are targets where th name is present in eitehr prefix or suffix dictionary
-        candidate_targets = targets_df[(targets_df.name.isin(self.prefix_df.name)) | (targets_df.name.isin(self.suffix_df.name))] #previously sub_targ
+
+        if not (isinstance(self.prefix_df, (bool))):
+            candidate_targets = targets_df[targets_df.name.isin(self.prefix_df.name)]
+
+        elif not (isinstance(self.suffix_df, (bool))):
+            candidate_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
+
+
+        # candidate_targets = targets_df[(targets_df.name.isin(self.prefix_df.name)) | (targets_df.name.isin(self.suffix_df.name))] #previously sub_targ
         # the original above code assumes that the prefix is present, changed to require one of suffixes or prefixes
 
-        print(f"Candidates: {candidate_targets}")
-
         #get the best alignments per target identified (previously sub_prefixes and sub_suffixes)
-        candidate_prefix_aligns = self.prefix_df.groupby('name').head(1).reset_index()
-        candidate_suffix_aligns = self.suffix_df.groupby('name').head(1).reset_index()
+        if not (isinstance(self.prefix_df, (bool))):
+            candidate_prefix_aligns = self.prefix_df.groupby('name').head(1).reset_index()
+        if not (isinstance(self.suffix_df, (bool))):   
+            candidate_suffix_aligns = self.suffix_df.groupby('name').head(1).reset_index()
         self.target_info = {}
+
         #filter candidates that aren't in a compatible orientation and save final candidates
         for row in candidate_targets.itertuples():
-            prefix_info =  candidate_prefix_aligns[candidate_prefix_aligns.name == row.name].reset_index()
-            suffix_info = candidate_suffix_aligns[candidate_suffix_aligns.name == row.name].reset_index()
+            if not (isinstance(self.prefix_df, (bool))):
+                prefix_info =  candidate_prefix_aligns[candidate_prefix_aligns.name == row.name].reset_index()
+            else:
+                prefix_info = False
+
+            if not (isinstance(self.suffix_df, (bool))): 
+                suffix_info = candidate_suffix_aligns[candidate_suffix_aligns.name == row.name].reset_index()
+            else: 
+                suffix_info = False
+            
             #save valid regions' attributes
             # keep status of read
             oriented, read_status = self.keep_region(prefix_info, suffix_info)
-            print(f"Result of keep region {read_status}")
             # prefix and suffix present and in right orientation
             if oriented:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info, suffix_info)
-            # only prefix present
-            elif read_status[1] == 1:
-                self.target_info[row.name] = self.get_align_info(row, prefix_info, False)
-            # only suffix present
-            elif read_status[1] == 2:
-                self.target_info[row.name] = self.get_align_info(row, False, suffix_info)
 
+            # only prefix present
+            elif read_status == 1:
+                self.target_info[row.name] = self.get_align_info(row, prefix_info=prefix_info, suffix_info=False)
+            # only suffix present
+            elif read_status == 2:
+                self.target_info[row.name] = self.get_align_info(row, prefix_info=False, suffix_info=suffix_info)
 
     def run_viterbi(self,hmm_file,rev_hmm_file,hidden_states,rev_states,out,build_pre, prefix_idx,output_labelled_seqs):
         '''
@@ -312,24 +401,57 @@ class Process_Read:
         
         # iterate through all targets saved in the class
         for name in self.target_info.keys():
+
+            read_reverse = False
+
             #choose hmm to use based on strand of target
             curr_hmm_file = build_pre + "_" + name + hmm_file
             curr_rev_file = build_pre + "_" + name + rev_hmm_file
+
+            # FORWARD STRAND
             if self.target_info[name]["strand"] == "forward":
+                '''
+                # forward but no prefix should be reversed
+                if self.read_status == 2:
+                    self.target_info[name]["subset"] = rev_comp(self.seq)
+                    print(f"Running Reverse viterbi for {self.read_id}")
+                    read_reverse = True
+                    curr_hmm = curr_rev_file
+                    curr_hidden_states_rev_file = open(build_pre + "_" + name + rev_states,'r')
+                    curr_states = curr_hidden_states_rev_file.readline().split(".")
+                    curr_hidden_states_rev_file.close()
+                '''
+
                 curr_hmm = curr_hmm_file
                 curr_hidden_states_file = open(build_pre + "_" + name + hidden_states,'r')
                 curr_states = curr_hidden_states_file.readline().split(".")
                 curr_hidden_states_file.close()
+
+            # REVERSE STRAND WITH SUFFIX
             else:
                 curr_hmm = curr_rev_file
                 curr_hidden_states_rev_file = open(build_pre + "_" + name + rev_states,'r')
                 curr_states = curr_hidden_states_rev_file.readline().split(".")
                 curr_hidden_states_rev_file.close()
+
+            '''
+            # REVERSE STRAND MISSING SUFFIX:
+            elif self.read_status == 1:
+                self.target_info[name]["subset"] = rev_comp(self.seq)
+                read_reverse = True
+                print(f"Running Forward viterbi for {self.read_id}")
+                curr_hmm = curr_hmm_file
+                curr_hidden_states_file = open(build_pre + "_" + name + hidden_states,'r')
+                curr_states = curr_hidden_states_file.readline().split(".")
+                curr_hidden_states_file.close()
+            '''
+
             #convert seqeunce to numeric so it is compatible with the C code
             numeric_seq = str(seq2int(self.target_info[name]["subset"].upper()))
             T = str(len(self.target_info[name]["subset"]))
             repeat_len = len(self.target_info[name]["repeat"])
             repeat_len_str = str(repeat_len)
+            # what is this for?
             prefix_idx_str = str(3*prefix_idx + 1)
             test_hmm_cython_path = files('c_files').joinpath('test_hmm_cython.py')
             command = ['python',test_hmm_cython_path,curr_hmm,T,numeric_seq, repeat_len_str, prefix_idx_str]
@@ -339,17 +461,33 @@ class Process_Read:
 
             #methods are either static in this class or will be imported by name
             labeled_seq, pointers,MLE = label_states(vit_out, curr_states)
+
             likelihood, sub_labels,repeats,context, final_repeat_like, repeat_start, repeat_end = calc_likelihood(vit_out, pointers,labeled_seq, curr_states, self.target_info[name]["subset"], self.target_info[name]["subset_start"],self.target_info[name]["subset_end"])
             #save state labels for KMeans method, if time we can figure out how to do this without saving a file
             label_file = open(out+"_"+ name + "_labeled_seqs.txt","a")
-            label_file.write(self.read_id + "\t" +".".join(labeled_seq)+"\n")
-            label_file.close()
-            count = count_repeats(labeled_seq,pointers,repeat_len,self.target_info[name]["subset"])
-            score = self.target_info[name]["prefix_mapq"] + self.target_info[name]["suffix_mapq"]
 
-            out_file = open(out+"_"+name+"_counts.txt","a")
+            # reverse states order if needed to reverse sequence
+            if read_reverse == True:
+                label_file.write(self.read_id + "\t" +".".join(labeled_seq[::-1])+"\n")
+            else:
+                label_file.write(self.read_id + "\t" +".".join(labeled_seq)+"\n")
+            label_file.close()
+
+            # removed ,self.target_info[name]["subset"] argument
+            count = count_repeats(labeled_seq,pointers,repeat_len)
+
+
+            if self.read_status == 3:
+                score = self.target_info[name]["prefix_mapq"] + self.target_info[name]["suffix_mapq"]
+            elif self.read_status == 2: # Suffix only
+                score = self.target_info[name]["suffix_mapq"]
+            else:
+                score = self.target_info[name]["prefix_mapq"]
+
+            out_file = open(out + "_" + name + "_counts.txt","a")
             out_file.write(self.read_id + " " + self.target_info[name]["strand"] + " "+ str(score) + " " + str(MLE) + " " + str(likelihood)+ " " + str(final_repeat_like) + " " + str(repeat_start) + " "+ str(repeat_end) + " "+ str(self.target_info[name]["align_start"]) + " "+str(self.target_info[name]["align_end"])+ " " + str(count) + "\n")
             out_file.close()
+
             #output labelled sequence to context file for given target if output_labelled_seqs is set
             if output_labelled_seqs:
                 print_labelled(self.read_id,self.target_info[name]["strand"],sub_labels,context,pointers,out + "_labelled_seqs/"+name+"_context_labeled.txt")

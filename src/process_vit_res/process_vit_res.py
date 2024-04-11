@@ -15,6 +15,7 @@ def label_states(vit_out, hidden_states):
         MLE (float): Maximum likelihood estimate of the viterbi path
 
     '''
+
     labeled_seq = []
     #pointers to record indeces of the start of each part of our model in the read sequence
     pointers = {"P":False, "R":False, "S":False, "G2":False, "D":[], "I":[]}
@@ -50,6 +51,7 @@ def label_states(vit_out, hidden_states):
             pointers["D"].append(i)
         if "I" in conversion[seq_list[i]]: #get indeces of all deletions
             pointers["I"].append(i)
+
     return labeled_seq, pointers,MLE
 
 
@@ -123,6 +125,7 @@ def calc_likelihood(vit_out, pointers, labeled_seq,hidden_states, read,subset_st
     R_end = pointers["S"] - pointers["P"]
     repeats = context[R_start:R_end] #need to see if this includes last index of repeat
     return final, final_labels, repeats, context, final_repeat_like, repeat_start, repeat_end
+
 def count_repeats(labeled_seq, pointers,repeat_len):
     '''
     Function to count the number of repeats in a sequence given a sequence labeled by its hidden states
@@ -140,6 +143,8 @@ def count_repeats(labeled_seq, pointers,repeat_len):
     # if missing suffix count until the end of the read
     if pointers["S"] == False:
         repeat_region = labeled_seq[pointers["R"]:]
+    elif pointers["P"] == False:
+        repeat_region = labeled_seq[:pointers["S"]]
     else:
         repeat_region = labeled_seq[pointers["R"]:pointers["S"]]
 
@@ -152,7 +157,7 @@ def count_repeats(labeled_seq, pointers,repeat_len):
             adjusted_length -= 1
 
     # use the modulo operator to count leftover states when read ends, then remove them to find repeat length
-    if pointers["S"] == False:
+    if (pointers["S"] == False) or (pointers["P"] == False):
         remainder = adjusted_length%repeat_len
         adjusted_length -= remainder
 

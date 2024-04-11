@@ -310,6 +310,7 @@ def call_peaks(row, out, out_count_name, plot_hists, max_peaks, filter_outliers=
         #check existence of count file, may not exist if no reads identified for a given target
         name = row[0]
         out_count_file = out + "_" + name + out_count_name
+        print(out_count_file)
         #print(out_count_file)
         if os.path.exists(out_count_file) == False:
             print(out_count_file + " does not exist, writing null row for", name,"...")
@@ -739,11 +740,13 @@ def main():
         pool_end = perf_counter()
         print("All reads processed, the pooled run took: ", pool_end-pool_start)
 
+
     #stats runs and allele calls
     if args.hmm_pre is None:
         build_pre = args.out #need to make sure this is compatible with new build all implentation
     else:
         build_pre = args.hmm_pre
+
     out_count_name = "_counts.txt"
 
     pool_start = perf_counter()
