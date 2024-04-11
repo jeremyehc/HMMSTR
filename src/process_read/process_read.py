@@ -193,6 +193,7 @@ class Process_Read:
             print("missing suffix")
             info["align_start"] = prefix_info.prefix_start[0]
             info["align_end"] = prefix_info.prefix_end[0]
+            info["prefix_mapq"] = prefix_info.prefix_mapq[0]
 
             if prefix_info.strand[0] == 1:
                 info["strand"] = "forward"
@@ -208,6 +209,7 @@ class Process_Read:
         else:
             info["align_start"] = suffix_info.suffix_start[0]
             info["align_end"] = suffix_info.suffix_end[0]
+            info["suffix_mapq"] = suffix_info.suffix_mapq[0]
 
             if suffix_info.strand[0] == 1:
                 info["strand"] = "forward"
