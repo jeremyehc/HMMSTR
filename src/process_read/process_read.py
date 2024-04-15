@@ -394,6 +394,8 @@ class Process_Read:
         ----------------------------------------------------------------------------------------------------
         bool for if the run was successful
         '''
+
+        print(f"testing {self.read_id}")
         #loop across all identified targets
         #if no targets, return
         if self.target_info == {}:
