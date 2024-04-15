@@ -102,7 +102,7 @@ class Process_Read:
             integer
             Stores an integer {0: no alignment at all, 1: prefix_only, 2: suffix_only, 3: both aligned}
         '''
-
+        
         # check that both contain alignemnts
         if not isinstance(prefix_info, (bool)) and not isinstance(suffix_info, (bool)):
             if len(suffix_info.index) != 0 and len(prefix_info.index) != 0:
