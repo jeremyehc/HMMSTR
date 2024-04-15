@@ -446,6 +446,8 @@ class Process_Read:
                 curr_hidden_states_file.close()
             '''
 
+            print(f"Testing: {self.read_id}")
+
             #convert seqeunce to numeric so it is compatible with the C code
             numeric_seq = str(seq2int(self.target_info[name]["subset"].upper()))
             T = str(len(self.target_info[name]["subset"]))
