@@ -188,13 +188,17 @@ def print_labelled(read_id,strand,sub_labels,context,pointers,out,read_status):
 
     context_list = list(context)
     # FIXME there is currently an edge case where if there is a deletion at the end of the repeat the sequence will continue to be labelled in white
-    if read_status == 2:
+    if read_status == 2: # missing prefix
         coordinate = 0
     else:
         coordinate = pointers["P"]
 
     R_start = pointers["R"] - coordinate
-    R_end = pointers["S"] - coordinate
+
+    if read_status == 1: # missng suffix
+        R_end = float('inf')
+    else:
+        R_end = pointers["S"] - coordinate
 
     print(R_start)
     print(R_end)
@@ -216,6 +220,7 @@ def print_labelled(read_id,strand,sub_labels,context,pointers,out,read_status):
     print("writing")
     #replace all inserted bases with color + base to be printed
     file = open(out,"a")
+    print((read_id + " " + strand + " " + '\x1b[1;30;40m' + "".join(context_list[:R_start]) + Style.RESET_ALL + '\x1b[1;37;40m' + "".join(context_list[R_start:R_end]) + Style.RESET_ALL +'\x1b[1;30;40m'+ "".join(context_list[R_end:])+ Style.RESET_ALL + "\n"))
     file.write(read_id + " " + strand + " " + '\x1b[1;30;40m' + "".join(context_list[:R_start]) + Style.RESET_ALL + '\x1b[1;37;40m' + "".join(context_list[R_start:R_end]) + Style.RESET_ALL +'\x1b[1;30;40m'+ "".join(context_list[R_end:])+ Style.RESET_ALL + "\n")
     file.close()
     return
