@@ -181,23 +181,29 @@ def print_labelled(read_id,strand,sub_labels,context,pointers,out,read_status):
     None, outputs new context sequence string to context file for given target
     '''
 
+    
+
     print(f"id:{read_id}")
     print(f"strand{strand}")
     print(f"status{read_status}")
     print(pointers)
     
-
+    '''
     context_list = list(context)
 
     print(f"context: {context_list}")
-    
+
     # FIXME there is currently an edge case where if there is a deletion at the end of the repeat the sequence will continue to be labelled in white
     if read_status == 2: # missing prefix
         coordinate = 0
     else:
         coordinate = pointers["P"]
 
+
+
     R_start = pointers["R"] - coordinate
+
+
 
     if read_status == 1: # missng suffix
         R_end = float('inf')
@@ -227,5 +233,30 @@ def print_labelled(read_id,strand,sub_labels,context,pointers,out,read_status):
     print((read_id + " " + strand + " " + '\x1b[1;30;40m' + "".join(context_list[:R_start]) + Style.RESET_ALL + '\x1b[1;37;40m' + "".join(context_list[R_start:R_end]) + Style.RESET_ALL +'\x1b[1;30;40m'+ "".join(context_list[R_end:])+ Style.RESET_ALL + "\n"))
     file.write(read_id + " " + strand + " " + '\x1b[1;30;40m' + "".join(context_list[:R_start]) + Style.RESET_ALL + '\x1b[1;37;40m' + "".join(context_list[R_start:R_end]) + Style.RESET_ALL +'\x1b[1;30;40m'+ "".join(context_list[R_end:])+ Style.RESET_ALL + "\n")
     file.close()
+    '''
+
+    R_start = pointers["R"] - pointers["P"]
+    R_end = pointers["S"] - pointers["P"]
+    context_list = list(context)
+    I = [i - pointers["P"] for i in pointers["I"]]
+    D = [i - pointers["P"] for i in pointers["D"]]
+    for i in I:
+        if i < R_start or i > R_end:
+            context_list[i] = '\x1b[5;37;42m' + context_list[i] + Style.RESET_ALL + '\x1b[1;30;40m'
+        else:
+            context_list[i] = '\x1b[5;37;42m' + context_list[i] +  Style.RESET_ALL + '\x1b[1;37;40m'
+    for i in D:
+        if i < R_start or i > R_end:
+            context_list[i] = '\x1b[5;31;41m'+" " + Style.RESET_ALL + '\x1b[1;30;40m'
+        else:
+            context_list[i] = '\x1b[5;31;41m' + " "+  Style.RESET_ALL + '\x1b[1;37;40m'
+    #replace all inserted bases with color + base to be printed
+    file = open(out,"a")
+    file.write(read_id + " " + strand + " " + '\x1b[1;30;40m' + "".join(context_list[:R_start]) + Style.RESET_ALL + '\x1b[1;37;40m' + "".join(context_list[R_start:R_end]) + Style.RESET_ALL +'\x1b[1;30;40m'+ "".join(context_list[R_end:])+ Style.RESET_ALL + "\n")
+    file.close()
+
+
+    print(f"start:{R_start}")
+    print(f"end:{R_end}")
     return
     

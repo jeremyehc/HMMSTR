@@ -358,17 +358,6 @@ class Process_Read:
 
             # FORWARD STRAND
             if self.target_info[name]["strand"] == "forward":
-                '''
-                # forward but no prefix should be reversed
-                if self.read_status == 2:
-                    self.target_info[name]["subset"] = rev_comp(self.seq)
-                    print(f"Running Reverse viterbi for {self.read_id}")
-                    read_reverse = True
-                    curr_hmm = curr_rev_file
-                    curr_hidden_states_rev_file = open(build_pre + "_" + name + rev_states,'r')
-                    curr_states = curr_hidden_states_rev_file.readline().split(".")
-                    curr_hidden_states_rev_file.close()
-                '''
 
                 curr_hmm = curr_hmm_file
                 curr_hidden_states_file = open(build_pre + "_" + name + hidden_states,'r')
@@ -382,17 +371,6 @@ class Process_Read:
                 curr_states = curr_hidden_states_rev_file.readline().split(".")
                 curr_hidden_states_rev_file.close()
 
-            '''
-            # REVERSE STRAND MISSING SUFFIX:
-            elif self.read_status == 1:
-                self.target_info[name]["subset"] = rev_comp(self.seq)
-                read_reverse = True
-                print(f"Running Forward viterbi for {self.read_id}")
-                curr_hmm = curr_hmm_file
-                curr_hidden_states_file = open(build_pre + "_" + name + hidden_states,'r')
-                curr_states = curr_hidden_states_file.readline().split(".")
-                curr_hidden_states_file.close()
-            '''
 
             #convert seqeunce to numeric so it is compatible with the C code
             numeric_seq = str(seq2int(self.target_info[name]["subset"].upper()))
@@ -438,6 +416,10 @@ class Process_Read:
 
             #output labelled sequence to context file for given target if output_labelled_seqs is set
             if output_labelled_seqs:
+                if pointers["P"] == False:
+                    pointers["P"] = 0
+                if pointers["P"] == False:
+                    pointers["S"] = len(self.seq)
                 print_labelled(self.read_id,self.target_info[name]["strand"],sub_labels,context,pointers,out + "_labelled_seqs/"+name+"_context_labeled.txt", self.read_status)
         return True
 
