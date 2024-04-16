@@ -227,9 +227,6 @@ class Process_Read:
             info["subset_end"] = len(self.seq) -1
             return info
 
-
-
-
         start_extend_400 = info["align_start"] + info["start_length"] - 400
         end_extend_400 = info["align_end"] - info["end_length"] + 400
         start_extend_50 = info["align_start"] + info["start_length"] - 50
@@ -254,57 +251,6 @@ class Process_Read:
             info["subset_end"] = end_extend_400 -1
 
         info["subset"] = self.seq[info["subset_start"]: info["subset_end"] + 1]
-
-        '''
-
-        # start positions + length of start is less than 400 and end length is less than full sequnece length: subset
-        # only 400 from end of repeat is possible
-        if start_extend_400 < 0 and end_extend_400 < len(self.seq):
-            # if prefix is present
-            if info["prefix_align_length"] > 0:
-                info["subset"] = self.seq[start_extend_50: end_extend_400]
-                info["subset_start"] = start_extend_50
-                info["subset_end"] = end_extend_400 -1
-
-            # no prefix, dont subset start
-            else:
-                info["subset"] = self.seq[:end_extend_400]
-                info["subset_start"] = 0
-                info["subset_end"] = end_extend_400 -1
-
-        
-        #  400 from start of repeat is possible
-        elif info["align_start"] + info["start_length"] - 400 > 0 and info["align_end"]-info["end_length"]+400 > len(self.seq):
-            if info["suffix_align_length"] > 0:
-                info["subset"] = self.seq[info["align_start"] + info["start_length"] - 400: info["align_end"]-info["end_length"]+50]
-                info["subset_start"] = info["align_start"] + info["start_length"] - 400
-                info["subset_end"] = info["align_end"]-info["end_length"]+50 -1
-            # no suffix
-            else:
-                info["subset"] = self.seq[:info["align_end"]-info["end_length"]+400]
-                info["subset_start"] = info["align_start"] + info["start_length"] - 400
-                info["subset_end"] = len(self.seq)
-
-        #neiher is possible
-        elif info["align_start"] + info["start_length"] - 400 < 0 and info["align_end"]-info["end_length"]+400 > len(self.seq):
-            # if subsetting 50 from start of repeat is not possible
-            if info["align_start"] + info["start_length"] - 50 < 0 and info["align_end"]-info["end_length"]+50 > len(self.seq):
-                info["subset"] = self.seq[info["align_start"] : info["align_end"]]
-                info["subset_start"] = info["align_start"]
-                info["subset_end"] = info["align_end"]-1
-            # subset 50 from each end
-            else:
-                info["subset"] = self.seq[info["align_start"] + info["start_length"] - 50: info["align_end"]-info["end_length"]+50] #switch back to 50 if this doesnt help
-                info["subset_start"] = info["align_start"] + info["start_length"] - 50
-                info["subset_end"] = info["align_end"]-info["end_length"]+50 -1
-        
-        # subset both ends
-        else:
-            info["subset"] = self.seq[info["align_start"] + info["start_length"] - 400: info["align_end"]-info["end_length"]+400]
-            info["subset_start"] = info["align_start"] + info["start_length"] - 400
-            info["subset_end"] = info["align_end"]-info["end_length"]+400 -1
-            
-        '''
 
         if len(info["subset"]) < 1:
             return #return nothing if there is no repeat in this sequence, spurious alignment
@@ -492,7 +438,7 @@ class Process_Read:
 
             #output labelled sequence to context file for given target if output_labelled_seqs is set
             if output_labelled_seqs:
-                print_labelled(self.read_id,self.target_info[name]["strand"],sub_labels,context,pointers,out + "_labelled_seqs/"+name+"_context_labeled.txt")
+                print_labelled(self.read_id,self.target_info[name]["strand"],sub_labels,context,pointers,out + "_labelled_seqs/"+name+"_context_labeled.txt", self.read_status)
         return True
 
         

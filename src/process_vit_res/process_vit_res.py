@@ -165,7 +165,7 @@ def count_repeats(labeled_seq, pointers,repeat_len):
     count = adjusted_length/repeat_len
     return count
 
-def print_labelled(read_id,strand,sub_labels,context,pointers,out):
+def print_labelled(read_id,strand,sub_labels,context,pointers,out,read_status):
     '''
     Function to output color-coded context seqeunce
 
@@ -176,15 +176,24 @@ def print_labelled(read_id,strand,sub_labels,context,pointers,out):
         context(str): context sequence including deletion labels
         pointers(dict): dictionary of pointers corresponding to indeces of insertions, deletions, and start positions
         out(str): output file suffix
+
     Returns:
     None, outputs new context sequence string to context file for given target
     '''
-    # FIXME there is currently an edge case where if there is a deletion at the end of the repeat the sequence will continue to be labelled in white
-    R_start = pointers["R"] - pointers["P"]
-    R_end = pointers["S"] - pointers["P"]
+
     context_list = list(context)
-    I = [i - pointers["P"] for i in pointers["I"]]
-    D = [i - pointers["P"] for i in pointers["D"]]
+    # FIXME there is currently an edge case where if there is a deletion at the end of the repeat the sequence will continue to be labelled in white
+    if read_status == 2:
+        coordinate = 0
+    else:
+        coordinate = pointers["P"]
+
+    R_start = pointers["R"] - coordinate
+    R_end = pointers["S"] - coordinate
+    
+    I = [i - coordinate for i in pointers["I"]]
+    D = [i - coordinate for i in pointers["D"]]
+
     for i in I:
         if i < R_start or i > R_end:
             context_list[i] = '\x1b[5;37;42m' + context_list[i] + Style.RESET_ALL + '\x1b[1;30;40m'
