@@ -181,12 +181,16 @@ def print_labelled(read_id,strand,sub_labels,context,pointers,out,read_status):
     None, outputs new context sequence string to context file for given target
     '''
 
-    print(read_id)
-    print(strand)
-    print(read_status)
+    print(f"id:{read_id}")
+    print(f"strand{strand}")
+    print(f"status{read_status}")
     print(pointers)
+    
 
     context_list = list(context)
+
+    print(f"context: {context_list}")
+    
     # FIXME there is currently an edge case where if there is a deletion at the end of the repeat the sequence will continue to be labelled in white
     if read_status == 2: # missing prefix
         coordinate = 0
@@ -200,8 +204,8 @@ def print_labelled(read_id,strand,sub_labels,context,pointers,out,read_status):
     else:
         R_end = pointers["S"] - coordinate
 
-    print(R_start)
-    print(R_end)
+    print(f"start:{R_start}")
+    print(f"end:{R_end}")
     
     I = [i - coordinate for i in pointers["I"]]
     D = [i - coordinate for i in pointers["D"]]
