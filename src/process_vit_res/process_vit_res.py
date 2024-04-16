@@ -252,6 +252,7 @@ def print_labelled(read_id,strand,sub_labels,context,pointers,out,read_status):
             context_list[i] = '\x1b[5;31;41m' + " "+  Style.RESET_ALL + '\x1b[1;37;40m'
     #replace all inserted bases with color + base to be printed
     file = open(out,"a")
+    print((read_id + " " + strand + " " + '\x1b[1;30;40m' + "".join(context_list[:R_start]) + Style.RESET_ALL + '\x1b[1;37;40m' + "".join(context_list[R_start:R_end]) + Style.RESET_ALL +'\x1b[1;30;40m'+ "".join(context_list[R_end:])+ Style.RESET_ALL + "\n"))
     file.write(read_id + " " + strand + " " + '\x1b[1;30;40m' + "".join(context_list[:R_start]) + Style.RESET_ALL + '\x1b[1;37;40m' + "".join(context_list[R_start:R_end]) + Style.RESET_ALL +'\x1b[1;30;40m'+ "".join(context_list[R_end:])+ Style.RESET_ALL + "\n")
     file.close()
 
