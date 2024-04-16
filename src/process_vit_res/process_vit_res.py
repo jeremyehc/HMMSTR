@@ -181,6 +181,9 @@ def print_labelled(read_id,strand,sub_labels,context,pointers,out,read_status):
     None, outputs new context sequence string to context file for given target
     '''
 
+    print(read_id)
+    print(strand)
+
     context_list = list(context)
     # FIXME there is currently an edge case where if there is a deletion at the end of the repeat the sequence will continue to be labelled in white
     if read_status == 2:
