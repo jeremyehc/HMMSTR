@@ -110,7 +110,7 @@ def calc_likelihood(vit_out, pointers, labeled_seq,hidden_states, read,subset_st
     #for each deletion, add a "-" in the raw sequence (this may not be the most efficient way to do this)
     context = ""
     offset = 0
-    #print(final_labels)
+    
     for i in range(len(labeled_seq)):
         if 'G' in labeled_seq[i]:
             continue
@@ -181,19 +181,14 @@ def print_labelled(read_id,strand,sub_labels,context,pointers,out,read_status):
     None, outputs new context sequence string to context file for given target
     '''
 
-    context_list = list(context)
     # FIXME there is currently an edge case where if there is a deletion at the end of the repeat the sequence will continue to be labelled in white
-    if read_status == 2:
-        coordinate = 0
-    else:
-        coordinate = pointers["P"]
 
-    R_start = pointers["R"] - coordinate
-    R_end = pointers["S"] - coordinate
-    
-    I = [i - coordinate for i in pointers["I"]]
-    D = [i - coordinate for i in pointers["D"]]
+    R_start = pointers["R"] - pointers["P"]
+    R_end = pointers["S"] - pointers["P"]
+    context_list = list(context)
 
+    I = [i - pointers["P"] for i in pointers["I"]]
+    D = [i - pointers["P"] for i in pointers["D"]]
     for i in I:
         if i < R_start or i > R_end:
             context_list[i] = '\x1b[5;37;42m' + context_list[i] + Style.RESET_ALL + '\x1b[1;30;40m'
@@ -204,6 +199,8 @@ def print_labelled(read_id,strand,sub_labels,context,pointers,out,read_status):
             context_list[i] = '\x1b[5;31;41m'+" " + Style.RESET_ALL + '\x1b[1;30;40m'
         else:
             context_list[i] = '\x1b[5;31;41m' + " "+  Style.RESET_ALL + '\x1b[1;37;40m'
+
+            
     #replace all inserted bases with color + base to be printed
     file = open(out,"a")
     file.write(read_id + " " + strand + " " + '\x1b[1;30;40m' + "".join(context_list[:R_start]) + Style.RESET_ALL + '\x1b[1;37;40m' + "".join(context_list[R_start:R_end]) + Style.RESET_ALL +'\x1b[1;30;40m'+ "".join(context_list[R_end:])+ Style.RESET_ALL + "\n")
