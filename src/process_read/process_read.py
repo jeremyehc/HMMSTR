@@ -408,8 +408,13 @@ class Process_Read:
             else:
                 score = self.target_info[name]["prefix_mapq"]
 
-            
-            out_file = open(out + "_" + name + "_counts.txt","a")
+            # full reads
+            if self.read_status == 3:
+                out_file = open(out + "_" + name + "_counts.txt","a")
+            # non-spanning reads
+            else:
+                out_file = open(out + "_" + name + "_estimated_counts.txt","a")
+
             out_file.write(self.read_id + " " + self.target_info[name]["strand"] + " "+ str(score) + " " + str(MLE) + " " + str(likelihood)+ " " + str(final_repeat_like) + " " + str(repeat_start) + " "+ str(repeat_end) + " "+ str(self.target_info[name]["align_start"]) + " "+str(self.target_info[name]["align_end"])+ " " + str(count) + "\n")
             out_file.close()
 
