@@ -237,6 +237,7 @@ def print_labelled(read_id,strand,sub_labels,context,pointers,out,read_status):
 
     R_start = pointers["R"] - pointers["P"]
     R_end = pointers["S"] - pointers["P"]
+    
     context_list = list(context)
     I = [i - pointers["P"] for i in pointers["I"]]
     D = [i - pointers["P"] for i in pointers["D"]]
@@ -257,8 +258,6 @@ def print_labelled(read_id,strand,sub_labels,context,pointers,out,read_status):
     print((read_id + " " + strand + " " + '\x1b[1;30;40m' + "".join(context_list[:R_start]) + Style.RESET_ALL + '\x1b[1;37;40m' + "".join(context_list[R_start:R_end]) + Style.RESET_ALL +'\x1b[1;30;40m'+ "".join(context_list[R_end:])+ Style.RESET_ALL + "\n"))
     file.write(read_id + " " + strand + " " + '\x1b[1;30;40m' + "".join(context_list[:R_start]) + Style.RESET_ALL + '\x1b[1;37;40m' + "".join(context_list[R_start:R_end]) + Style.RESET_ALL +'\x1b[1;30;40m'+ "".join(context_list[R_end:])+ Style.RESET_ALL + "\n")
     file.close()
-
-
     print(f"start:{R_start}")
     print(f"end:{R_end}")
     return

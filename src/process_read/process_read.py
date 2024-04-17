@@ -418,6 +418,7 @@ class Process_Read:
             if output_labelled_seqs:
                 if pointers["P"] == False:
                     pointers["P"] = 0
+                    pointers["R"] = 0
                 if pointers["S"] == False:
                     pointers["S"] = len(self.seq)
                 print_labelled(self.read_id,self.target_info[name]["strand"],sub_labels,context,pointers,out + "_labelled_seqs/"+name+"_context_labeled.txt", self.read_status)
