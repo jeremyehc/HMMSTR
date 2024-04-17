@@ -103,25 +103,26 @@ class Process_Read:
             Stores an integer {0: no alignment at all, 1: prefix_only, 2: suffix_only, 3: both aligned}
         '''
         
-        # check that both contain alignemnts
+        # check if both prefix and suffix contain alignemnts
         if not isinstance(prefix_info, (bool)) and not isinstance(suffix_info, (bool)):
             if len(suffix_info.index) != 0 and len(prefix_info.index) != 0:
                 # check alignments are on the same strand
                 self.read_status = 3
+                # forward strand
                 if prefix_info.strand[0] == suffix_info.strand[0]: 
                     return(True,3)
                 else:
-                    # reverse
+                    # reverse strand
                     return(False,3)
         elif isinstance(prefix_info, (bool)) and isinstance(suffix_info, (bool)):
-        # neither aligned
+        # neither prefix nor suffix aligned
             self.read_status = 0
             return(False, 0)
         # just prefix aligned
         elif not isinstance(prefix_info, (bool)):
             self.read_status = 1
             return(False, 1)
-        # suffix aligned
+        # just suffix aligned
         else:
             self.read_status = 2
             return(False, 2)
@@ -165,7 +166,6 @@ class Process_Read:
 
 
         # both prefix and suffix info are present
-        # if (info["prefix_align_length"] > 0) and (info["suffix_align_length"] > 0):
         if self.read_status == 3:
         # get strand and start and end coordinates
             if prefix_info.strand[0] == 1 and suffix_info.strand[0] == 1:
@@ -176,7 +176,7 @@ class Process_Read:
                 info["start_length"] = info["prefix_align_length"]
             else: #reverse
                 info["strand"] = "reverse"
-                info["align_start"] = suffix_info.suffix_start[0] #switched back cause I was wrong about which coordinates mappy returns for the reverse case
+                info["align_start"] = suffix_info.suffix_start[0]
                 info["align_end"] = prefix_info.prefix_end[0]
                 info["end_length"] = info["prefix_align_length"]
                 info["start_length"] = info["suffix_align_length"]
@@ -185,9 +185,7 @@ class Process_Read:
             info["prefix_mapq"] = prefix_info.prefix_mapq[0]
             info["suffix_mapq"] = suffix_info.suffix_mapq[0]
 
-        # A bit of confusion regarding strandedness here: review this for correctness
         # only prefix present
-        # elif info["prefix_align_length"] > 0:
         elif self.read_status == 1:
             info["align_start"] = prefix_info.prefix_start[0]
             info["align_end"] = prefix_info.prefix_end[0]
@@ -410,6 +408,7 @@ class Process_Read:
             else:
                 score = self.target_info[name]["prefix_mapq"]
 
+            
             out_file = open(out + "_" + name + "_counts.txt","a")
             out_file.write(self.read_id + " " + self.target_info[name]["strand"] + " "+ str(score) + " " + str(MLE) + " " + str(likelihood)+ " " + str(final_repeat_like) + " " + str(repeat_start) + " "+ str(repeat_end) + " "+ str(self.target_info[name]["align_start"]) + " "+str(self.target_info[name]["align_end"])+ " " + str(count) + "\n")
             out_file.close()
