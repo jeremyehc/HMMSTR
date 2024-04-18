@@ -310,8 +310,6 @@ def call_peaks(row, out, out_count_name, plot_hists, max_peaks, filter_outliers=
         #check existence of count file, may not exist if no reads identified for a given target
         name = row[0]
         out_count_file = out + "_" + name + out_count_name
-        print(out_count_file)
-        #print(out_count_file)
         if os.path.exists(out_count_file) == False:
             print(out_count_file + " does not exist, writing null row for", name,"...")
             # returning null at the beginning of the run may be causing issues with apply, try returning a null row of the right dimensions
@@ -566,7 +564,6 @@ def call_peaks_stranded(row, out, out_count_name, plot_hists, max_peaks, filter_
 
 
 def main():
-    print("Running master model")
     parser = argparse.ArgumentParser()
     #Required inputs
     subparsers = parser.add_subparsers(dest='subcommand')

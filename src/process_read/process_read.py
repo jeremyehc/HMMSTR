@@ -2,7 +2,6 @@ import pandas as pd
 import mappy
 from os.path import exists
 from HMMSTR_utils.HMMSTR_utils import seq2int
-from HMMSTR_utils.HMMSTR_utils import rev_comp
 from subprocess import run, PIPE
 from importlib_resources import files
 
@@ -108,11 +107,10 @@ class Process_Read:
             if len(suffix_info.index) != 0 and len(prefix_info.index) != 0:
                 # check alignments are on the same strand
                 self.read_status = 3
-                # forward strand
+                # valid targets
                 if prefix_info.strand[0] == suffix_info.strand[0]: 
                     return(True,3)
                 else:
-                    # reverse strand
                     return(False,3)
         elif isinstance(prefix_info, (bool)) and isinstance(suffix_info, (bool)):
         # neither prefix nor suffix aligned
@@ -264,13 +262,10 @@ class Process_Read:
         targets_df: pandas DataFrame. DataFrame of tandem repeat target loci to compare to alignment results
         '''
 
-        # print(f"aligning targets for read: {self.seq}") # reaches this step with no issues
-
-
+    
         #check if any alignemnts returned
         if isinstance(self.prefix_df, (bool)) and isinstance(self.suffix_df, (bool)): #no alignments
             return False #need to decide on final returns for this function still
-
 
 
         #subset to only get targets that aligned according to mappy
