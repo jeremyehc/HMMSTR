@@ -142,8 +142,11 @@ class Process_Read:
         info: dictionary. Dictionary of alignment and subset information for the current read
         '''
 
-        if self.read_id == 4:
+        if self.read_status == 4:
             raise Exception("INVALID READ STATUS: READ STATUS NOT ASSIGNED")
+        
+        print(f"Read: {self.read_id}")
+        print(f"Status: {self.read_status}")
 
         #dictionary of info for current target
         info = {}
@@ -338,8 +341,7 @@ class Process_Read:
         ----------------------------------------------------------------------------------------------------
         bool for if the run was successful
         '''
-
-        print(f"testing {self.read_id}")
+        print(f"viterbi for: {self.read_id}")
         #loop across all identified targets
         #if no targets, return
         if self.target_info == {}:
