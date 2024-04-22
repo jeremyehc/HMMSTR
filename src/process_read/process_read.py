@@ -413,12 +413,25 @@ class Process_Read:
             else:
                 score = self.target_info[name]["prefix_mapq"]
 
-            # full reads
+
+            # test for XDP
+            if name == 'XDP':
+                print(f"ran XDP for read {self.read_id} with status {self.read_status}")
+
+            
+
+            #full reads
             if self.read_status == 3:
                 out_file = open(out + "_" + name + "_counts.txt","a")
+
+                if name == 'XDP':
+                    print(f"WROTE FULL for read {self.read_id} with status {self.read_status}")
             # non-spanning reads
             else:
                 out_file = open(out + "_" + name + "_estimated_counts.txt","a")
+                if name == 'XDP':
+                    print(f"ESTIMATED for read {self.read_id} with status {self.read_status}")
+
 
             out_file.write(self.read_id + " " + self.target_info[name]["strand"] + " "+ str(score) + " " + str(MLE) + " " + str(likelihood)+ " " + str(final_repeat_like) + " " + str(repeat_start) + " "+ str(repeat_end) + " "+ str(self.target_info[name]["align_start"]) + " "+str(self.target_info[name]["align_end"])+ " " + str(count) + "\n")
             out_file.close()
