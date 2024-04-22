@@ -341,12 +341,15 @@ class Process_Read:
         ----------------------------------------------------------------------------------------------------
         bool for if the run was successful
         '''
-        print(f"viterbi for: {self.read_id}")
+
         #loop across all identified targets
         #if no targets, return
         if self.target_info == {}:
+            # print(f"{self.read_id} has no targets")
             return False
         
+        print(f"iterating viterbi for: {self.read_id}")
+
         # iterate through all targets saved in the class
         for name in self.target_info.keys():
 
