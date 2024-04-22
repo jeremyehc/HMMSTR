@@ -144,10 +144,7 @@ class Process_Read:
 
         if self.read_status == 4:
             raise Exception("INVALID READ STATUS: READ STATUS NOT ASSIGNED")
-        
-        print(f"Read: {self.read_id}")
-        print(f"Status: {self.read_status}")
-
+    
         #dictionary of info for current target
         info = {}
         #may or may not want these in the dictionary, seems like a good idea to keep them together
@@ -348,7 +345,7 @@ class Process_Read:
             # print(f"{self.read_id} has no targets")
             return False
         
-        print(f"iterating viterbi for: {self.read_id}")
+        # print(f"iterating viterbi for: {self.read_id}")
 
         # iterate through all targets saved in the class
         for name in self.target_info.keys():
@@ -429,8 +426,6 @@ class Process_Read:
             # non-spanning reads
             else:
                 out_file = open(out + "_" + name + "_estimated_counts.txt","a")
-                if name == 'XDP':
-                    print(f"ESTIMATED for read {self.read_id} with status {self.read_status}")
 
 
             out_file.write(self.read_id + " " + self.target_info[name]["strand"] + " "+ str(score) + " " + str(MLE) + " " + str(likelihood)+ " " + str(final_repeat_like) + " " + str(repeat_start) + " "+ str(repeat_end) + " "+ str(self.target_info[name]["align_start"]) + " "+str(self.target_info[name]["align_end"])+ " " + str(count) + "\n")
