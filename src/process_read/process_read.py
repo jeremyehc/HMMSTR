@@ -271,26 +271,41 @@ class Process_Read:
         '''
 
         # print(f"aligning targets for read: {self.seq}") # reaches this step with no issues
-
-
+        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
+            print(f"Assigning XDP: {self.seq} with status: {self.read_status}")
+        if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+            print(f"Assigning BSS: {self.seq} with status: {self.read_status}")
+        
         #check if any alignemnts returned
         if isinstance(self.prefix_df, (bool)) and isinstance(self.suffix_df, (bool)): #no alignments
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
+                print(f"NO ALIGNMENT: Assigning XDP: {self.seq} with status: {self.read_status}")
+            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                print(f"NO ALIGNMENT: Assigning BSS: {self.seq} with status: {self.read_status}")
             return False #need to decide on final returns for this function still
-
-
 
         #subset to only get targets that aligned according to mappy
         # candidate targets are targets where th name is present in eitehr prefix or suffix dictionary
 
         if not (isinstance(self.prefix_df, (bool))):
             candidate_targets = targets_df[targets_df.name.isin(self.prefix_df.name)]
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
+                print(f"PREFIX: Assigning XDP: {self.seq} with status: {self.read_status}")
+            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                print(f"PREFIX: Assigning BSS: {self.seq} with status: {self.read_status}")
 
         elif not (isinstance(self.suffix_df, (bool))):
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
+                print(f"SUFFIX: Assigning XDP: {self.seq} with status: {self.read_status}")
+            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                print(f"SUFFIX: Assigning BSS: {self.seq} with status: {self.read_status}")
             candidate_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
 
 
         # candidate_targets = targets_df[(targets_df.name.isin(self.prefix_df.name)) | (targets_df.name.isin(self.suffix_df.name))] #previously sub_targ
         # the original above code assumes that the prefix is present, changed to require one of suffixes or prefixes
+
+
 
         #get the best alignments per target identified (previously sub_prefixes and sub_suffixes)
         if not (isinstance(self.prefix_df, (bool))):
@@ -298,6 +313,14 @@ class Process_Read:
         if not (isinstance(self.suffix_df, (bool))):   
             candidate_suffix_aligns = self.suffix_df.groupby('name').head(1).reset_index()
         self.target_info = {}
+
+        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
+                print("XDP TARGETS")
+                print(candidate_targets)
+
+        if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                print("BSS TARGETS")
+                print(candidate_targets)
 
         #filter candidates that aren't in a compatible orientation and save final candidates
         for row in candidate_targets.itertuples():
