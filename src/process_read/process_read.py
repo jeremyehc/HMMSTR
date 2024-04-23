@@ -103,33 +103,87 @@ class Process_Read:
             Stores an integer {0: no alignment at all, 1: prefix_only, 2: suffix_only, 3: both aligned}
         '''
         
-        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
+        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
             print(f"XDP: {self.seq}")
 
-        if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+        if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
             print(f"BSS: {self.seq}")
 
         # check if both prefix and suffix contain alignemnts
         if not isinstance(prefix_info, (bool)) and not isinstance(suffix_info, (bool)):
+
+
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
+                print(f"XDP: PASS_1")
+
+            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
+                print(f"BSS: PASS_1")
+        
+
             if len(suffix_info.index) != 0 and len(prefix_info.index) != 0:
                 # check alignments are on the same strand
                 self.read_status = 3
+
+
+                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
+                    print(f"XDP: PASS_2")
+
+                if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
+                    print(f"BSS: PASS_2")
+
+
                 # forward strand
                 if prefix_info.strand[0] == suffix_info.strand[0]: 
+
+                    if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
+                        print(f"XDP: PASS_3")
+
+                    if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
+                        print(f"BSS: PASS_3")
+
                     return(True,3)
+                
                 else:
                     # reverse strand
                     return(False,3)
+                
+
+
+
         elif isinstance(prefix_info, (bool)) and isinstance(suffix_info, (bool)):
         # neither prefix nor suffix aligned
             self.read_status = 0
+
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
+                print(f"XDP: PASS_4")
+
+            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
+                print(f"BSS: PASS_4")
+
             return(False, 0)
+        
         # just prefix aligned
         elif not isinstance(prefix_info, (bool)):
             self.read_status = 1
+
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
+                print(f"XDP: PASS_5")
+
+            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
+                print(f"BSS: PASS_5")
+
+
             return(False, 1)
         # just suffix aligned
+
         else:
+
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
+                print(f"XDP: PASS_6")
+
+            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
+                print(f"BSS: PASS_6")
+
             self.read_status = 2
             return(False, 2)
         
@@ -313,12 +367,12 @@ class Process_Read:
         self.target_info = {}
 
         if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
-                print("XDP TARGETS")
-                print(candidate_targets)
+            print("XDP TARGETS")
+            print(candidate_targets)
 
-        if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                print("BSS TARGETS")
-                print(candidate_targets)
+        if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
+            print("BSS TARGETS")
+            print(candidate_targets)
 
         #filter candidates that aren't in a compatible orientation and save final candidates
         for row in candidate_targets.itertuples():
@@ -334,7 +388,8 @@ class Process_Read:
             
             #save valid regions' attributes
             # keep status of read
-            oriented, read_status = self.keep_region(prefix_info, suffix_info)
+            oriented, read_status = self.keep_region(prefix_info, suffix_info) ###
+
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
                 print(f"XDP TARGETS status {self.read_status}")
                 print(candidate_targets)
