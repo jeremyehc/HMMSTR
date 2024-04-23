@@ -341,10 +341,6 @@ class Process_Read:
         
         #check if any alignemnts returned
         if isinstance(self.prefix_df, (bool)) and isinstance(self.suffix_df, (bool)): #no alignments
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
-                print(f"NO ALIGNMENT: Assigning XDP: {self.seq} with status: {self.read_status}")
-            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                print(f"NO ALIGNMENT: Assigning BSS: {self.seq} with status: {self.read_status}")
             return False #need to decide on final returns for this function still
 
         #subset to only get targets that aligned according to mappy
@@ -366,7 +362,13 @@ class Process_Read:
         # candidate_targets = targets_df[(targets_df.name.isin(self.prefix_df.name)) | (targets_df.name.isin(self.suffix_df.name))] #previously sub_targ
         # the original above code assumes that the prefix is present, changed to require one of suffixes or prefixes
 
+        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
+            print("XDP TARGETS pre-filter")
+            print(candidate_targets)
 
+        if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
+            print("BSS TARGETS pre-filter")
+            print(candidate_targets)
 
         #get the best alignments per target identified (previously sub_prefixes and sub_suffixes)
         if not (isinstance(self.prefix_df, (bool))):
@@ -385,6 +387,9 @@ class Process_Read:
 
         #filter candidates that aren't in a compatible orientation and save final candidates
         for row in candidate_targets.itertuples():
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                print(row)
+
             if not (isinstance(self.prefix_df, (bool))):
                 prefix_info =  candidate_prefix_aligns[candidate_prefix_aligns.name == row.name].reset_index()
             else:
@@ -447,9 +452,6 @@ class Process_Read:
                     print(f"BSS SUFFIX PRESENT for {row}")
                     print(candidate_targets)
 
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
-                print(self.seq)
-                print(candidate_targets)
 
     def run_viterbi(self,hmm_file,rev_hmm_file,hidden_states,rev_states,out,build_pre, prefix_idx,output_labelled_seqs):
         '''
