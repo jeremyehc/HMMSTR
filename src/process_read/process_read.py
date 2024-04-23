@@ -113,10 +113,19 @@ class Process_Read:
         if not isinstance(prefix_info, (bool)) and not isinstance(suffix_info, (bool)):
 
 
+
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
+                print("XDP: PASS 0")
+                print(f"XDP suffix length: {len(suffix_info.index)}")
+                print("split")
+                print(f"XDP prefix length: {len(prefix_info.index)}")
                 print(f"XDP: PASS_1")
 
-            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
+            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ### passed
+                print("BSS: PASS 0")
+                print(f"BSS suffix length: {len(prefix_info.index)}")
+                print("split")
+                print(f"BSS prefix length: {len(suffix_info.index)}")
                 print(f"BSS: PASS_1")
         
 
@@ -386,6 +395,14 @@ class Process_Read:
             else: 
                 suffix_info = False
             
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
+                print(f"XDP INFO {prefix_info}")
+                print(suffix_info)
+
+            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                print(f"BSS INFO {prefix_info}")
+                print(suffix_info)
+
             #save valid regions' attributes
             # keep status of read
             oriented, read_status = self.keep_region(prefix_info, suffix_info) ###
