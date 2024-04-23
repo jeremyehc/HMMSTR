@@ -370,10 +370,15 @@ class Process_Read:
             if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
                 print(f"PREFIX: Assigning BSS: {self.seq} with status: {self.read_status}") ####
 
-        elif not (isinstance(self.suffix_df, (bool))):
+        if not (isinstance(self.suffix_df, (bool))):
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
                 print(f"SUFFIX: Assigning XDP: {self.seq} with status: {self.read_status}")
-            candidate_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
+            
+            if not (isinstance(self.prefix_df, (bool))):
+                suffix_candidate_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
+                candidate_targets = candidate_targets.append(suffix_candidate_targets)
+            else:
+                candidate_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
 
 
         # candidate_targets = targets_df[(targets_df.name.isin(self.prefix_df.name)) | (targets_df.name.isin(self.suffix_df.name))] #previously sub_targ
@@ -492,8 +497,8 @@ class Process_Read:
 
 
         if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
-                print(self.seq)
-                print(self.target_info)
+            print(self.seq)
+            print(self.target_info)
 
         #loop across all identified targets
         #if no targets, return
@@ -590,7 +595,7 @@ class Process_Read:
 
                 if name == 'BSS':
                     print(f"ESTIMATED BSS for read {self.read_id} with status {self.read_status}")
-                    print(self.seq)
+                    # print(self.seq)
 
             out_file.write(self.read_id + " " + self.target_info[name]["strand"] + " "+ str(score) + " " + str(MLE) + " " + str(likelihood)+ " " + str(final_repeat_like) + " " + str(repeat_start) + " "+ str(repeat_end) + " "+ str(self.target_info[name]["align_start"]) + " "+str(self.target_info[name]["align_end"])+ " " + str(count) + "\n")
             out_file.close()
