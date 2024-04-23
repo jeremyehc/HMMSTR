@@ -319,6 +319,10 @@ class Process_Read:
             elif read_status == 2:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info=False, suffix_info=suffix_info)
 
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
+                print(self.seq)
+                print(candidate_targets)
+
     def run_viterbi(self,hmm_file,rev_hmm_file,hidden_states,rev_states,out,build_pre, prefix_idx,output_labelled_seqs):
         '''
         This function runs viterbi on the current read across all identified targets.
@@ -338,6 +342,11 @@ class Process_Read:
         ----------------------------------------------------------------------------------------------------
         bool for if the run was successful
         '''
+
+
+        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
+                print(self.seq)
+                print(self.target_info)
 
         #loop across all identified targets
         #if no targets, return
@@ -415,18 +424,26 @@ class Process_Read:
             if name == 'XDP':
                 print(f"ran XDP for read {self.read_id} with status {self.read_status}")
 
-            
-
+        
             #full reads
             if self.read_status == 3:
                 out_file = open(out + "_" + name + "_counts.txt","a")
 
                 if name == 'XDP':
                     print(f"WROTE FULL for read {self.read_id} with status {self.read_status}")
+
+                if name == 'BSS':
+                    print(f"BSS WROTE FULL for read {self.read_id} with status {self.read_status}")
+                    print(self.seq)
+
+
             # non-spanning reads
             else:
                 out_file = open(out + "_" + name + "_estimated_counts.txt","a")
 
+                if name == 'BSS':
+                    print(f"ESTIMATED BSS for read {self.read_id} with status {self.read_status}")
+                    print(self.seq)
 
             out_file.write(self.read_id + " " + self.target_info[name]["strand"] + " "+ str(score) + " " + str(MLE) + " " + str(likelihood)+ " " + str(final_repeat_like) + " " + str(repeat_start) + " "+ str(repeat_end) + " "+ str(self.target_info[name]["align_start"]) + " "+str(self.target_info[name]["align_end"])+ " " + str(count) + "\n")
             out_file.close()
