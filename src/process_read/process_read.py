@@ -106,7 +106,7 @@ class Process_Read:
         if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
             print(f"XDP: {self.seq}")
 
-        if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53'
+        if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
             print(f"BSS: {self.seq}")
 
         # check if both prefix and suffix contain alignemnts
