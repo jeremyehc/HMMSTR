@@ -56,6 +56,10 @@ class Process_Read:
             for hit in aligner.map(seq):
                 if hit.mapq < self.cutoff:
                     continue
+                
+                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                    print(f"prefix: {name}")
+
                 prefix_dict["name"].append(name)
                 prefix_dict["prefix_start"].append(hit.r_st)
                 prefix_dict["prefix_end"].append(hit.r_en)
@@ -68,12 +72,20 @@ class Process_Read:
             for hit in aligner.map(seq):
                 if hit.mapq < self.cutoff:
                     continue
+
+                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                    print(f"prefix: {name}")
+
                 suffix_dict["name"].append(name)
                 suffix_dict["suffix_start"].append(hit.r_st)
                 suffix_dict["suffix_end"].append(hit.r_en)
                 suffix_dict["suffix_mapq"].append(hit.mapq)
                 suffix_dict["strand"].append(hit.strand)
                 suffix_dict["alignment_length"].append(hit.blen)
+
+
+
+        
 
         #record if no valid alignment found
         if len(prefix_dict['name']) < 1:
@@ -84,6 +96,11 @@ class Process_Read:
             self.suffix_df = False
         else:
             self.suffix_df = pd.DataFrame(suffix_dict)
+
+        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+            print(f"prefix df: {self.prefix_df}") 
+            print(f"suffix df: {self.suffix_df}") 
+
         return
     
     def keep_region(self, prefix_info, suffix_info):
@@ -564,7 +581,7 @@ class Process_Read:
 
                 if name == 'BSS':
                     print(f"BSS WROTE FULL for read {self.read_id} with status {self.read_status}")
-                    print(self.seq)
+                    # print(self.seq)
 
 
             # non-spanning reads
