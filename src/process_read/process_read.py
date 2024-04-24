@@ -127,52 +127,54 @@ class Process_Read:
             print(f"BSS: {self.seq}")
 
         # check if both prefix and suffix contain alignemnts
-        if not isinstance(prefix_info, (bool)) and not isinstance(suffix_info, (bool)):
+        # if not isinstance(prefix_info, (bool)) and not isinstance(suffix_info, (bool)):
+
+        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
+            print("XDP: PASS 0")
+            print(f"XDP suffix length: {len(suffix_info.index)}")
+            print("split")
+            print(f"XDP prefix length: {len(prefix_info.index)}")
+            print(f"XDP: PASS_1")
+
+        if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ### passed
+            print("BSS: PASS 0")
+            print(f"BSS suffix length: {len(prefix_info.index)}")
+            print("split")
+            print(f"BSS prefix length: {len(suffix_info.index)}")
+            print(f"BSS: PASS_1")
+        
+        # Check length of prefix and suffix
+        if len(suffix_info.index) != 0 and len(prefix_info.index) != 0:
+            
+            
+            # check alignments are on the same strand
 
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
-                print("XDP: PASS 0")
-                print(f"XDP suffix length: {len(suffix_info.index)}")
-                print("split")
-                print(f"XDP prefix length: {len(prefix_info.index)}")
-                print(f"XDP: PASS_1")
-
-            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ### passed
-                print("BSS: PASS 0")
-                print(f"BSS suffix length: {len(prefix_info.index)}")
-                print("split")
-                print(f"BSS prefix length: {len(suffix_info.index)}")
-                print(f"BSS: PASS_1")
-        
-
-            if len(suffix_info.index) != 0 and len(prefix_info.index) != 0:
-                # check alignments are on the same strand
-
-                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
                     print(f"XDP: PASS_2")
 
-                if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
+            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
                     print(f"BSS: PASS_2")
 
 
                 # forward strand
-                if prefix_info.strand[0] == suffix_info.strand[0]: 
+            if prefix_info.strand[0] == suffix_info.strand[0]: 
 
-                    if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
-                        print(f"XDP: PASS_3")
+                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
+                    print(f"XDP: PASS_3")
 
-                    if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
-                        print(f"BSS: PASS_3")
+                if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
+                    print(f"BSS: PASS_3")
 
-                    return(True,3)
+                return(True,3)
                 
-                else:
+            else:
                     # reverse strand
-                    return(False,3)
+                return(False,3)
                 
 
 
 
-        elif isinstance(prefix_info, (bool)) and isinstance(suffix_info, (bool)):
+        elif len(suffix_info.index) == 0 and len(prefix_info.index) == 0:
         # neither prefix nor suffix aligned
 
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
@@ -184,7 +186,7 @@ class Process_Read:
             return(False, 0)
         
         # just prefix aligned
-        elif not isinstance(prefix_info, (bool)):
+        elif len(prefix_info.index) != 0:
 
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
                 print(f"XDP: PASS_5")
@@ -460,14 +462,10 @@ class Process_Read:
 
             if not (isinstance(self.prefix_df, (bool))):
                 prefix_info =  candidate_prefix_aligns[candidate_prefix_aligns.name == row.name].reset_index()
-            else:
-                prefix_info = False
 
             if not (isinstance(self.suffix_df, (bool))): 
                 suffix_info = candidate_suffix_aligns[candidate_suffix_aligns.name == row.name].reset_index()
-            else: 
-                suffix_info = False
-            
+
 
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
                 print(f"XDP INFO {prefix_info}")
