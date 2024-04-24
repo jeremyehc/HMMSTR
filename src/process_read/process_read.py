@@ -172,8 +172,6 @@ class Process_Read:
                 return(False,3)
                 
 
-
-
         elif len(suffix_info.index) == 0 and len(prefix_info.index) == 0:
         # neither prefix nor suffix aligned
 
@@ -234,13 +232,13 @@ class Process_Read:
         info["suffix"] = row.suffix.rstrip() 
 
         # get prefix info if prefix is present
-        if not (isinstance(prefix_info, (bool))):
+        if len(prefix_info.index) > 0:
             info["prefix_align_length"] = prefix_info.alignment_length[0]
         else:
             info["prefix_align_length"] = 0
 
         # get suffix info if suffix is present
-        if not (isinstance(suffix_info, (bool))):
+        if len(suffix_info.index) > 0:
             info["suffix_align_length"] = suffix_info.alignment_length[0]
         else: 
             info["suffix_align_length"] = 0
@@ -455,8 +453,11 @@ class Process_Read:
             print("BSS TARGETS")
             print(candidate_targets)
 
-        #filter candidates that aren't in a compatible orientation and save final candidates
+
+
+        #filter candidates that aren't in a compatible orientation and save final candidates FIXME: CURRENTLY NOT ITERATING 
         for row in candidate_targets.itertuples():
+
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
                 print(row)
 
@@ -497,18 +498,19 @@ class Process_Read:
 
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
                 print(f"XDP TARGETS status {self.read_status[row.name]}")
-                print(candidate_targets)
+                print(self.target_info)
 
             if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
                 print(f"BSS TARGETS status {self.read_status[row.name]}")
-                print(candidate_targets)
-
+                print(self.target_info)
 
 
 
 
             # prefix and suffix present and in right orientation
             if oriented:
+                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                    print(f"INTO ALIGN INFO")
                 self.target_info[row.name] = self.get_align_info(row, prefix_info, suffix_info)
                 if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
                     print(f"XDP oriented for {row}")
@@ -520,7 +522,13 @@ class Process_Read:
 
             # only prefix present
             elif read_status[row.name] == 1:
-                self.target_info[row.name] = self.get_align_info(row, prefix_info=prefix_info, suffix_info=False)
+
+                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                    print(f"INTO ALIGN INFO  2")
+
+                self.target_info[row.name] = self.get_align_info(row, prefix_info, suffix_info)
+
+
                 if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
                     print(f"XDP PREFIX PRESENT for: {row}")
                     print(candidate_targets)
@@ -530,7 +538,12 @@ class Process_Read:
                     print(candidate_targets)
             # only suffix present
             elif read_status[row.name] == 2:
-                self.target_info[row.name] = self.get_align_info(row, prefix_info=False, suffix_info=suffix_info)
+                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                    print(f"INTO ALIGN INFO 3")
+
+                self.target_info[row.name] = self.get_align_info(row, prefix_info, suffix_info)
+
+
                 if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
                     print(f"XDP SUFFIX PRESENT for {row}")
                     print(candidate_targets)
