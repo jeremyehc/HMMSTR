@@ -475,7 +475,12 @@ class Process_Read:
             #save valid regions' attributes
             # keep status of read
             oriented, read_status = self.keep_region(prefix_info, suffix_info) ###
+
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                print("Passed keep region")
             self.read_status[row.name] = read_status
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                print(f"Assigned read status {self.read_status[row.name]}")
 
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
                 print(f"XDP TARGETS status {self.read_status[row.name]}")
@@ -537,11 +542,8 @@ class Process_Read:
         ----------------------------------------------------------------------------------------------------
         bool for if the run was successful
         '''
-
-
-        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
-            print(self.seq)
-            print(self.target_info)
+        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                print("INTO VITERBI")
 
         #loop across all identified targets
         #if no targets, return
