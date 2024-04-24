@@ -15,7 +15,7 @@ class Process_Read:
         self.read_id = header.split(" ")[0][1:]
         self.seq = seq
         # dictionary of targets with int values: 0 = no align, 1 = prefix only, 2 = suffix only, 3 = both
-        self.read_status = []
+        self.read_status = {}
         # mapq cutoff
         self.cutoff = cutoff
         self.mode = mode
