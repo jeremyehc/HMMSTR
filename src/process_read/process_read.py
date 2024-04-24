@@ -361,6 +361,28 @@ class Process_Read:
         #subset to only get targets that aligned according to mappy
         # candidate targets are targets where th name is present in eitehr prefix or suffix dictionary
         
+
+        # both prefix and suffix dfs exist
+        if not (isinstance(self.prefix_df, (bool))) and not (isinstance(self.suffix_df, (bool))):
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                print("BOTH")
+            candidate_targets = targets_df[targets_df.name.isin(self.prefix_df.name) | targets_df.name.isin(self.suffix_df.name)]
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                print(f"Assigned both: {candidate_targets}")
+        elif not (isinstance(self.prefix_df, (bool))):
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                print("PREFIX")
+            candidate_targets = targets_df[targets_df.name.isin(self.prefix_df.name)]
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                print(f"Assigned prefix: {candidate_targets}")
+        else:
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                print("PREFIX")
+            candidate_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                print(f"Assigned suffix: {candidate_targets}")
+
+        '''
         if not (isinstance(self.prefix_df, (bool))):
             candidate_targets = targets_df[targets_df.name.isin(self.prefix_df.name)]
 
@@ -376,9 +398,12 @@ class Process_Read:
             # both prefix and suffix exist
             if not (isinstance(self.prefix_df, (bool))):
                 suffix_candidate_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
+
+            
                 if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
                     print("prefix exists")
                     print(f"suffix candidates: {suffix_candidate_targets}")
+
                 candidate_targets = candidate_targets.append(suffix_candidate_targets,ignore_index = True)
             
             # just suffix alignments
@@ -387,7 +412,7 @@ class Process_Read:
                 if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
                     print(f"no prefix exists {candidate_targets}")
 
-
+        '''
         '''
         if not (isinstance(self.prefix_df, (bool))):
             candidate_targets = targets_df[targets_df.name.isin(self.prefix_df.name)]
@@ -404,7 +429,6 @@ class Process_Read:
         
         '''
 
-
         # candidate_targets = targets_df[(targets_df.name.isin(self.prefix_df.name)) | (targets_df.name.isin(self.suffix_df.name))] #previously sub_targ
         # the original above code assumes that the prefix is present, changed to require one of suffixes or prefixes
 
@@ -416,7 +440,7 @@ class Process_Read:
             print("BSS TARGETS pre-filter")
             print(candidate_targets)
 
-        #get the best alignments per target identified (previously sub_prefixes and sub_suffixes)
+        #get the best alignments per target identified 
         if not (isinstance(self.prefix_df, (bool))):
             candidate_prefix_aligns = self.prefix_df.groupby('name').head(1).reset_index()
         if not (isinstance(self.suffix_df, (bool))):   
@@ -446,6 +470,10 @@ class Process_Read:
             else: 
                 suffix_info = False
             
+
+
+
+
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
                 print(f"XDP INFO {prefix_info}")
                 print(suffix_info)
@@ -453,6 +481,9 @@ class Process_Read:
             if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
                 print(f"BSS INFO {prefix_info}")
                 print(suffix_info)
+
+
+
 
             #save valid regions' attributes
             # keep status of read
