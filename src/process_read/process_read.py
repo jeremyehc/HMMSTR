@@ -129,8 +129,6 @@ class Process_Read:
         # check if both prefix and suffix contain alignemnts
         if not isinstance(prefix_info, (bool)) and not isinstance(suffix_info, (bool)):
 
-
-
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
                 print("XDP: PASS 0")
                 print(f"XDP suffix length: {len(suffix_info.index)}")
@@ -200,8 +198,8 @@ class Process_Read:
 
 
             return(False, 1)
+        
         # just suffix aligned
-
         else:
 
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
@@ -362,7 +360,7 @@ class Process_Read:
 
         #subset to only get targets that aligned according to mappy
         # candidate targets are targets where th name is present in eitehr prefix or suffix dictionary
-        '''
+        
         if not (isinstance(self.prefix_df, (bool))):
             candidate_targets = targets_df[targets_df.name.isin(self.prefix_df.name)]
 
@@ -372,15 +370,22 @@ class Process_Read:
                 print(f"PREFIX: Assigning BSS: {self.seq} with status: {self.read_status}") ####
 
         if not (isinstance(self.suffix_df, (bool))):
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
-                print(f"SUFFIX: Assigning XDP: {self.seq} with status: {self.read_status}")
-            
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                print(f"SUFFIX: Assigning XDP or BSS: {self.seq} with status: {self.read_status}")
+                
+            # both prefix and suffix exist
             if not (isinstance(self.prefix_df, (bool))):
                 suffix_candidate_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
-                candidate_targets = candidate_targets.append(suffix_candidate_targets)
+                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                    print("prefix exists")
+                    print(f"suffix candidates: {suffix_candidate_targets}")
+                candidate_targets = candidate_targets.append(suffix_candidate_targets,ignore_index = True)
+            
+            # just suffix alignments
             else:
                 candidate_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
-
+                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                    print(f"no prefix exists {candidate_targets}")
 
 
         '''
@@ -394,9 +399,10 @@ class Process_Read:
         elif not (isinstance(self.suffix_df, (bool))):
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
                 print(f"SUFFIX: Assigning XDP: {self.seq} with status: {self.read_status}")
+
             candidate_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
         
-
+        '''
 
 
         # candidate_targets = targets_df[(targets_df.name.isin(self.prefix_df.name)) | (targets_df.name.isin(self.suffix_df.name))] #previously sub_targ
