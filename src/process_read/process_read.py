@@ -362,9 +362,10 @@ class Process_Read:
 
         #subset to only get targets that aligned according to mappy
         # candidate targets are targets where th name is present in eitehr prefix or suffix dictionary
-
+        '''
         if not (isinstance(self.prefix_df, (bool))):
             candidate_targets = targets_df[targets_df.name.isin(self.prefix_df.name)]
+
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
                 print(f"PREFIX: Assigning XDP: {self.seq} with status: {self.read_status}")
             if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
@@ -379,6 +380,23 @@ class Process_Read:
                 candidate_targets = candidate_targets.append(suffix_candidate_targets)
             else:
                 candidate_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
+
+
+
+        '''
+        if not (isinstance(self.prefix_df, (bool))):
+            candidate_targets = targets_df[targets_df.name.isin(self.prefix_df.name)]
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
+                print(f"PREFIX: Assigning XDP: {self.seq} with status: {self.read_status}")
+            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                print(f"PREFIX: Assigning BSS: {self.seq} with status: {self.read_status}") ####
+
+        elif not (isinstance(self.suffix_df, (bool))):
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
+                print(f"SUFFIX: Assigning XDP: {self.seq} with status: {self.read_status}")
+            candidate_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
+        
+
 
 
         # candidate_targets = targets_df[(targets_df.name.isin(self.prefix_df.name)) | (targets_df.name.isin(self.suffix_df.name))] #previously sub_targ
