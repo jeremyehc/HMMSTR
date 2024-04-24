@@ -521,7 +521,7 @@ class Process_Read:
                     print(candidate_targets)
 
             # only prefix present
-            elif read_status[row.name] == 1:
+            elif self.read_status[row.name] == 1:
 
                 if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
                     print(f"INTO ALIGN INFO  2")
@@ -537,7 +537,7 @@ class Process_Read:
                     print(f"BSS PREFIX PRESENT for: {row}")
                     print(candidate_targets)
             # only suffix present
-            elif read_status[row.name] == 2:
+            elif self.read_status[row.name] == 2:
                 if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
                     print(f"INTO ALIGN INFO 3")
 
