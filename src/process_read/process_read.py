@@ -478,7 +478,11 @@ class Process_Read:
 
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
                 print("Passed keep region")
+                print(f"read status: {read_status}")
+                print(self.read_status)
+
             self.read_status[row.name] = read_status
+
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
                 print(f"Assigned read status {self.read_status[row.name]}")
 
