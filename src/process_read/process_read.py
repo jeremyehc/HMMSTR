@@ -221,6 +221,9 @@ class Process_Read:
         info: dictionary. Dictionary of alignment and subset information for the current read
         '''
     
+        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+            print(f"Alignment info")
+
         #dictionary of info for current target
         info = {}
         #may or may not want these in the dictionary, seems like a good idea to keep them together
@@ -325,6 +328,9 @@ class Process_Read:
             info["subset_end"] = end_extend_400 -1
 
         info["subset"] = self.seq[info["subset_start"]: info["subset_end"] + 1]
+
+        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+            print(f"Subset end")
 
         if len(info["subset"]) < 1:
             return #return nothing if there is no repeat in this sequence, spurious alignment
@@ -484,6 +490,11 @@ class Process_Read:
             self.read_status[row.name] = read_status
 
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
+                print("Assigned read dict")
+                print(f"read status: {read_status}")
+                print(self.read_status)
+
+            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
                 print(f"Assigned read status {self.read_status[row.name]}")
 
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
@@ -494,6 +505,10 @@ class Process_Read:
                 print(f"BSS TARGETS status {self.read_status[row.name]}")
                 print(candidate_targets)
 
+
+
+
+
             # prefix and suffix present and in right orientation
             if oriented:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info, suffix_info)
@@ -502,7 +517,7 @@ class Process_Read:
                     print(candidate_targets)
 
                 if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                    print(f"XDP oriented for {row}")
+                    print(f"BSS oriented for {row}")
                     print(candidate_targets)
 
             # only prefix present
@@ -636,8 +651,6 @@ class Process_Read:
                 if name == 'BSS':
                     print(f"BSS WROTE FULL for read {self.read_id} with status {self.read_status[name]}")
                     # print(self.seq)
-
-
             # non-spanning reads
             else:
                 out_file = open(out + "_" + name + "_estimated_counts.txt","a")
