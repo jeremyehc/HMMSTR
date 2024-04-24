@@ -14,8 +14,8 @@ class Process_Read:
     def __init__(self, header, seq, cutoff=30, mode = "map-ont", out = ".", k = None, w = None, use_full_seq = False):
         self.read_id = header.split(" ")[0][1:]
         self.seq = seq
-        # 0 = no align, 1 = prefix only, 2 = suffix only, 3 = both
-        self.read_status = 4
+        # dictionary of targets with int values: 0 = no align, 1 = prefix only, 2 = suffix only, 3 = both
+        self.read_status = []
         # mapq cutoff
         self.cutoff = cutoff
         self.mode = mode
@@ -146,8 +146,6 @@ class Process_Read:
 
             if len(suffix_info.index) != 0 and len(prefix_info.index) != 0:
                 # check alignments are on the same strand
-                self.read_status = 3
-
 
                 if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
                     print(f"XDP: PASS_2")
@@ -176,7 +174,6 @@ class Process_Read:
 
         elif isinstance(prefix_info, (bool)) and isinstance(suffix_info, (bool)):
         # neither prefix nor suffix aligned
-            self.read_status = 0
 
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
                 print(f"XDP: PASS_4")
@@ -188,7 +185,6 @@ class Process_Read:
         
         # just prefix aligned
         elif not isinstance(prefix_info, (bool)):
-            self.read_status = 1
 
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
                 print(f"XDP: PASS_5")
@@ -208,7 +204,6 @@ class Process_Read:
             if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
                 print(f"BSS: PASS_6")
 
-            self.read_status = 2
             return(False, 2)
         
     def get_align_info(self, row, prefix_info, suffix_info):
@@ -225,9 +220,6 @@ class Process_Read:
         ----------------------------------------------------------------------------------------------------
         info: dictionary. Dictionary of alignment and subset information for the current read
         '''
-
-        if self.read_status == 4:
-            raise Exception("INVALID READ STATUS: READ STATUS NOT ASSIGNED")
     
         #dictionary of info for current target
         info = {}
@@ -250,7 +242,7 @@ class Process_Read:
 
 
         # both prefix and suffix info are present
-        if self.read_status == 3:
+        if self.read_status[row.name] == 3:
         # get strand and start and end coordinates
             if prefix_info.strand[0] == 1 and suffix_info.strand[0] == 1:
                 info["strand"] = "forward"
@@ -270,7 +262,7 @@ class Process_Read:
             info["suffix_mapq"] = suffix_info.suffix_mapq[0]
 
         # only prefix present
-        elif self.read_status == 1:
+        elif self.read_status[row.name] == 1:
             info["align_start"] = prefix_info.prefix_start[0]
             info["align_end"] = prefix_info.prefix_end[0]
             info["prefix_mapq"] = prefix_info.prefix_mapq[0]
@@ -350,9 +342,9 @@ class Process_Read:
 
         # print(f"aligning targets for read: {self.seq}") # reaches this step with no issues
         if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
-            print(f"Assigning XDP: {self.seq} with status: {self.read_status}")
+            print(f"Assigning XDP: {self.seq}")
         if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-            print(f"Assigning BSS: {self.seq} with status: {self.read_status}")
+            print(f"Assigning BSS: {self.seq}")
         
         #check if any alignemnts returned
         if isinstance(self.prefix_df, (bool)) and isinstance(self.suffix_df, (bool)): #no alignments
@@ -471,9 +463,6 @@ class Process_Read:
                 suffix_info = False
             
 
-
-
-
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
                 print(f"XDP INFO {prefix_info}")
                 print(suffix_info)
@@ -483,18 +472,17 @@ class Process_Read:
                 print(suffix_info)
 
 
-
-
             #save valid regions' attributes
             # keep status of read
             oriented, read_status = self.keep_region(prefix_info, suffix_info) ###
+            self.read_status[row.name] = read_status
 
             if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
-                print(f"XDP TARGETS status {self.read_status}")
+                print(f"XDP TARGETS status {self.read_status[row.name]}")
                 print(candidate_targets)
 
             if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                print(f"BSS TARGETS status {self.read_status}")
+                print(f"BSS TARGETS status {self.read_status[row.name]}")
                 print(candidate_targets)
 
             # prefix and suffix present and in right orientation
@@ -509,7 +497,7 @@ class Process_Read:
                     print(candidate_targets)
 
             # only prefix present
-            elif read_status == 1:
+            elif read_status[row.name] == 1:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info=prefix_info, suffix_info=False)
                 if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
                     print(f"XDP PREFIX PRESENT for: {row}")
@@ -519,7 +507,7 @@ class Process_Read:
                     print(f"BSS PREFIX PRESENT for: {row}")
                     print(candidate_targets)
             # only suffix present
-            elif read_status == 2:
+            elif read_status[row.name] == 2:
                 self.target_info[row.name] = self.get_align_info(row, prefix_info=False, suffix_info=suffix_info)
                 if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
                     print(f"XDP SUFFIX PRESENT for {row}")
@@ -619,9 +607,9 @@ class Process_Read:
             count = count_repeats(labeled_seq,pointers,repeat_len)
 
 
-            if self.read_status == 3:
+            if self.read_status[name] == 3:
                 score = self.target_info[name]["prefix_mapq"] + self.target_info[name]["suffix_mapq"]
-            elif self.read_status == 2: # Suffix only
+            elif self.read_status[name] == 2: # Suffix only
                 score = self.target_info[name]["suffix_mapq"]
             else:
                 score = self.target_info[name]["prefix_mapq"]
@@ -629,18 +617,18 @@ class Process_Read:
 
             # test for XDP
             if name == 'XDP':
-                print(f"ran XDP for read {self.read_id} with status {self.read_status}")
+                print(f"ran XDP for read {self.read_id} with status {self.read_status[name]}")
 
         
             #full reads
-            if self.read_status == 3:
+            if self.read_status[name] == 3:
                 out_file = open(out + "_" + name + "_counts.txt","a")
 
                 if name == 'XDP':
-                    print(f"WROTE FULL for read {self.read_id} with status {self.read_status}")
+                    print(f"WROTE FULL for read {self.read_id} with status {self.read_status[name]}")
 
                 if name == 'BSS':
-                    print(f"BSS WROTE FULL for read {self.read_id} with status {self.read_status}")
+                    print(f"BSS WROTE FULL for read {self.read_id} with status {self.read_status[name]}")
                     # print(self.seq)
 
 
@@ -649,7 +637,7 @@ class Process_Read:
                 out_file = open(out + "_" + name + "_estimated_counts.txt","a")
 
                 if name == 'BSS':
-                    print(f"ESTIMATED BSS for read {self.read_id} with status {self.read_status}")
+                    print(f"ESTIMATED BSS for read {self.read_id} with status {self.read_status[name]}")
                     # print(self.seq)
 
             out_file.write(self.read_id + " " + self.target_info[name]["strand"] + " "+ str(score) + " " + str(MLE) + " " + str(likelihood)+ " " + str(final_repeat_like) + " " + str(repeat_start) + " "+ str(repeat_end) + " "+ str(self.target_info[name]["align_start"]) + " "+str(self.target_info[name]["align_end"])+ " " + str(count) + "\n")
@@ -662,7 +650,7 @@ class Process_Read:
                     pointers["R"] = 0
                 if pointers["S"] == False:
                     pointers["S"] = len(self.seq)
-                print_labelled(self.read_id,self.target_info[name]["strand"],sub_labels,context,pointers,out + "_labelled_seqs/"+name+"_context_labeled.txt", self.read_status)
+                print_labelled(self.read_id,self.target_info[name]["strand"],sub_labels,context,pointers,out + "_labelled_seqs/"+name+"_context_labeled.txt", self.read_status[name])
         return True
 
         
