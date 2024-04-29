@@ -2,7 +2,6 @@ import pandas as pd
 import mappy
 from os.path import exists
 from HMMSTR_utils.HMMSTR_utils import seq2int
-from HMMSTR_utils.HMMSTR_utils import rev_comp
 from subprocess import run, PIPE
 from importlib_resources import files
 
@@ -112,6 +111,7 @@ class Process_Read:
         '''
 
         # check if both prefix and suffix contain alignemnts
+
         # if not isinstance(prefix_info, (bool)) and not isinstance(suffix_info, (bool)):
         
         # Check length of prefix and suffix
@@ -126,7 +126,6 @@ class Process_Read:
                 
             else:# reverse strand
                 return(False,3)
-                
 
         elif len(suffix_info.index) == 0 and len(prefix_info.index) == 0:
         # neither prefix nor suffix aligned
@@ -279,8 +278,6 @@ class Process_Read:
         -----------------------------------------------------------------------------------------------------
         targets_df: pandas DataFrame. DataFrame of tandem repeat target loci to compare to alignment results
         '''
-
-        # print(f"aligning targets for read: {self.seq}") # reaches this step with no issues
 
         #check if any alignemnts returned
         if isinstance(self.prefix_df, (bool)) and isinstance(self.suffix_df, (bool)): #no alignments
