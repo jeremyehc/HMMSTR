@@ -73,9 +73,6 @@ class Process_Read:
                 if hit.mapq < self.cutoff:
                     continue
 
-                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                    print(f"prefix: {name}")
-
                 suffix_dict["name"].append(name)
                 suffix_dict["suffix_start"].append(hit.r_st)
                 suffix_dict["suffix_end"].append(hit.r_en)
@@ -84,8 +81,6 @@ class Process_Read:
                 suffix_dict["alignment_length"].append(hit.blen)
 
 
-
-        
 
         #record if no valid alignment found
         if len(prefix_dict['name']) < 1:
@@ -96,10 +91,6 @@ class Process_Read:
             self.suffix_df = False
         else:
             self.suffix_df = pd.DataFrame(suffix_dict)
-
-        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-            print(f"prefix df: {self.prefix_df}") 
-            print(f"suffix df: {self.suffix_df}") 
 
         return
     
@@ -119,29 +110,9 @@ class Process_Read:
             integer
             Stores an integer {0: no alignment at all, 1: prefix_only, 2: suffix_only, 3: both aligned}
         '''
-        
-        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
-            print(f"XDP: {self.seq}")
-
-        if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
-            print(f"BSS: {self.seq}")
 
         # check if both prefix and suffix contain alignemnts
         # if not isinstance(prefix_info, (bool)) and not isinstance(suffix_info, (bool)):
-
-        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
-            print("XDP: PASS 0")
-            print(f"XDP suffix length: {len(suffix_info.index)}")
-            print("split")
-            print(f"XDP prefix length: {len(prefix_info.index)}")
-            print(f"XDP: PASS_1")
-
-        if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ### passed
-            print("BSS: PASS 0")
-            print(f"BSS suffix length: {len(prefix_info.index)}")
-            print("split")
-            print(f"BSS prefix length: {len(suffix_info.index)}")
-            print(f"BSS: PASS_1")
         
         # Check length of prefix and suffix
         if len(suffix_info.index) != 0 and len(prefix_info.index) != 0:
@@ -149,61 +120,24 @@ class Process_Read:
             
             # check alignments are on the same strand
 
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
-                    print(f"XDP: PASS_2")
-
-            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
-                    print(f"BSS: PASS_2")
-
-
                 # forward strand
             if prefix_info.strand[0] == suffix_info.strand[0]: 
-
-                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
-                    print(f"XDP: PASS_3")
-
-                if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
-                    print(f"BSS: PASS_3")
-
                 return(True,3)
                 
-            else:
-                    # reverse strand
+            else:# reverse strand
                 return(False,3)
                 
 
         elif len(suffix_info.index) == 0 and len(prefix_info.index) == 0:
         # neither prefix nor suffix aligned
-
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
-                print(f"XDP: PASS_4")
-
-            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
-                print(f"BSS: PASS_4")
-
             return(False, 0)
         
         # just prefix aligned
         elif len(prefix_info.index) != 0:
-
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
-                print(f"XDP: PASS_5")
-
-            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
-                print(f"BSS: PASS_5")
-
-
             return(False, 1)
         
         # just suffix aligned
         else:
-
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc': ###
-                print(f"XDP: PASS_6")
-
-            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
-                print(f"BSS: PASS_6")
-
             return(False, 2)
         
     def get_align_info(self, row, prefix_info, suffix_info):
@@ -347,11 +281,7 @@ class Process_Read:
         '''
 
         # print(f"aligning targets for read: {self.seq}") # reaches this step with no issues
-        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
-            print(f"Assigning XDP: {self.seq}")
-        if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-            print(f"Assigning BSS: {self.seq}")
-        
+
         #check if any alignemnts returned
         if isinstance(self.prefix_df, (bool)) and isinstance(self.suffix_df, (bool)): #no alignments
             return False #need to decide on final returns for this function still
@@ -362,81 +292,13 @@ class Process_Read:
 
         # both prefix and suffix dfs exist
         if not (isinstance(self.prefix_df, (bool))) and not (isinstance(self.suffix_df, (bool))):
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                print("BOTH")
             candidate_targets = targets_df[targets_df.name.isin(self.prefix_df.name) | targets_df.name.isin(self.suffix_df.name)]
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                print(f"Assigned both: {candidate_targets}")
+
         elif not (isinstance(self.prefix_df, (bool))):
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                print("PREFIX")
             candidate_targets = targets_df[targets_df.name.isin(self.prefix_df.name)]
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                print(f"Assigned prefix: {candidate_targets}")
+
         else:
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                print("PREFIX")
             candidate_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                print(f"Assigned suffix: {candidate_targets}")
-
-        '''
-        if not (isinstance(self.prefix_df, (bool))):
-            candidate_targets = targets_df[targets_df.name.isin(self.prefix_df.name)]
-
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
-                print(f"PREFIX: Assigning XDP: {self.seq} with status: {self.read_status}")
-            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                print(f"PREFIX: Assigning BSS: {self.seq} with status: {self.read_status}") ####
-
-        if not (isinstance(self.suffix_df, (bool))):
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                print(f"SUFFIX: Assigning XDP or BSS: {self.seq} with status: {self.read_status}")
-                
-            # both prefix and suffix exist
-            if not (isinstance(self.prefix_df, (bool))):
-                suffix_candidate_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
-
-            
-                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                    print("prefix exists")
-                    print(f"suffix candidates: {suffix_candidate_targets}")
-
-                candidate_targets = candidate_targets.append(suffix_candidate_targets,ignore_index = True)
-            
-            # just suffix alignments
-            else:
-                candidate_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
-                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                    print(f"no prefix exists {candidate_targets}")
-
-        '''
-        '''
-        if not (isinstance(self.prefix_df, (bool))):
-            candidate_targets = targets_df[targets_df.name.isin(self.prefix_df.name)]
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
-                print(f"PREFIX: Assigning XDP: {self.seq} with status: {self.read_status}")
-            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                print(f"PREFIX: Assigning BSS: {self.seq} with status: {self.read_status}") ####
-
-        elif not (isinstance(self.suffix_df, (bool))):
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
-                print(f"SUFFIX: Assigning XDP: {self.seq} with status: {self.read_status}")
-
-            candidate_targets = targets_df[targets_df.name.isin(self.suffix_df.name)]
-        
-        '''
-
-        # candidate_targets = targets_df[(targets_df.name.isin(self.prefix_df.name)) | (targets_df.name.isin(self.suffix_df.name))] #previously sub_targ
-        # the original above code assumes that the prefix is present, changed to require one of suffixes or prefixes
-
-        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
-            print("XDP TARGETS pre-filter")
-            print(candidate_targets)
-
-        if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
-            print("BSS TARGETS pre-filter")
-            print(candidate_targets)
 
         #get the best alignments per target identified 
         if not (isinstance(self.prefix_df, (bool))):
@@ -445,21 +307,8 @@ class Process_Read:
             candidate_suffix_aligns = self.suffix_df.groupby('name').head(1).reset_index()
         self.target_info = {}
 
-        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
-            print("XDP TARGETS")
-            print(candidate_targets)
-
-        if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53': ###
-            print("BSS TARGETS")
-            print(candidate_targets)
-
-
-
         #filter candidates that aren't in a compatible orientation and save final candidates FIXME: CURRENTLY NOT ITERATING 
         for row in candidate_targets.itertuples():
-
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                print(row)
 
             if not (isinstance(self.prefix_df, (bool))):
                 prefix_info =  candidate_prefix_aligns[candidate_prefix_aligns.name == row.name].reset_index()
@@ -467,90 +316,24 @@ class Process_Read:
             if not (isinstance(self.suffix_df, (bool))): 
                 suffix_info = candidate_suffix_aligns[candidate_suffix_aligns.name == row.name].reset_index()
 
-
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
-                print(f"XDP INFO {prefix_info}")
-                print(suffix_info)
-
-            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                print(f"BSS INFO {prefix_info}")
-                print(suffix_info)
-
-
             #save valid regions' attributes
             # keep status of read
             oriented, read_status = self.keep_region(prefix_info, suffix_info) ###
 
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                print("Passed keep region")
-                print(f"read status: {read_status}")
-                print(self.read_status)
-
             self.read_status[row.name] = read_status
-
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                print("Assigned read dict")
-                print(f"read status: {read_status}")
-                print(self.read_status)
-
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                print(f"Assigned read status {self.read_status[row.name]}")
-
-            if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
-                print(f"XDP TARGETS status {self.read_status[row.name]}")
-                print(self.target_info)
-
-            if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                print(f"BSS TARGETS status {self.read_status[row.name]}")
-                print(self.target_info)
-
-
 
 
             # prefix and suffix present and in right orientation
             if oriented:
-                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                    print(f"INTO ALIGN INFO")
                 self.target_info[row.name] = self.get_align_info(row, prefix_info, suffix_info)
-                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
-                    print(f"XDP oriented for {row}")
-                    print(candidate_targets)
-
-                if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                    print(f"BSS oriented for {row}")
-                    print(candidate_targets)
 
             # only prefix present
             elif self.read_status[row.name] == 1:
-
-                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                    print(f"INTO ALIGN INFO  2")
-
                 self.target_info[row.name] = self.get_align_info(row, prefix_info, suffix_info)
 
-
-                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
-                    print(f"XDP PREFIX PRESENT for: {row}")
-                    print(candidate_targets)
-
-                if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                    print(f"BSS PREFIX PRESENT for: {row}")
-                    print(candidate_targets)
             # only suffix present
             elif self.read_status[row.name] == 2:
-                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                    print(f"INTO ALIGN INFO 3")
-
                 self.target_info[row.name] = self.get_align_info(row, prefix_info, suffix_info)
-
-
-                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc':
-                    print(f"XDP SUFFIX PRESENT for {row}")
-                    print(candidate_targets)
-
-                if self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                    print(f"BSS SUFFIX PRESENT for {row}")
-                    print(candidate_targets)
 
 
     def run_viterbi(self,hmm_file,rev_hmm_file,hidden_states,rev_states,out,build_pre, prefix_idx,output_labelled_seqs):
@@ -572,8 +355,6 @@ class Process_Read:
         ----------------------------------------------------------------------------------------------------
         bool for if the run was successful
         '''
-        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                print("INTO VITERBI")
 
         #loop across all identified targets
         #if no targets, return
@@ -646,29 +427,13 @@ class Process_Read:
             else:
                 score = self.target_info[name]["prefix_mapq"]
 
-
-            # test for XDP
-            if name == 'XDP':
-                print(f"ran XDP for read {self.read_id} with status {self.read_status[name]}")
-
-        
             #full reads
             if self.read_status[name] == 3:
                 out_file = open(out + "_" + name + "_counts.txt","a")
 
-                if name == 'XDP':
-                    print(f"WROTE FULL for read {self.read_id} with status {self.read_status[name]}")
-
-                if name == 'BSS':
-                    print(f"BSS WROTE FULL for read {self.read_id} with status {self.read_status[name]}")
-                    # print(self.seq)
             # non-spanning reads
             else:
                 out_file = open(out + "_" + name + "_estimated_counts.txt","a")
-
-                if name == 'BSS':
-                    print(f"ESTIMATED BSS for read {self.read_id} with status {self.read_status[name]}")
-                    # print(self.seq)
 
             out_file.write(self.read_id + " " + self.target_info[name]["strand"] + " "+ str(score) + " " + str(MLE) + " " + str(likelihood)+ " " + str(final_repeat_like) + " " + str(repeat_start) + " "+ str(repeat_end) + " "+ str(self.target_info[name]["align_start"]) + " "+str(self.target_info[name]["align_end"])+ " " + str(count) + "\n")
             out_file.close()
