@@ -55,9 +55,6 @@ class Process_Read:
             for hit in aligner.map(seq):
                 if hit.mapq < self.cutoff:
                     continue
-                
-                if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-                    print(f"prefix: {name}")
 
                 prefix_dict["name"].append(name)
                 prefix_dict["prefix_start"].append(hit.r_st)
@@ -153,9 +150,6 @@ class Process_Read:
         ----------------------------------------------------------------------------------------------------
         info: dictionary. Dictionary of alignment and subset information for the current read
         '''
-    
-        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-            print(f"Alignment info")
 
         #dictionary of info for current target
         info = {}
@@ -261,9 +255,6 @@ class Process_Read:
             info["subset_end"] = end_extend_400 -1
 
         info["subset"] = self.seq[info["subset_start"]: info["subset_end"] + 1]
-
-        if self.read_id == '8665ce7c-8b2d-46ab-b114-d3f3266a87bc' or self.read_id == 'c506e3b8-e1f6-429f-8a19-a145f2f74e53':
-            print(f"Subset end")
 
         if len(info["subset"]) < 1:
             return #return nothing if there is no repeat in this sequence, spurious alignment
