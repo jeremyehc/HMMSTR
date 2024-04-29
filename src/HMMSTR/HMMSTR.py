@@ -564,6 +564,7 @@ def call_peaks_stranded(row, out, out_count_name, plot_hists, max_peaks, filter_
 
 
 def main():
+  
     parser = argparse.ArgumentParser()
     #Required inputs
     subparsers = parser.add_subparsers(dest='subcommand')
