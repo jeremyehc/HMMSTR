@@ -13,11 +13,12 @@ class Process_Read:
     def __init__(self, header, seq, cutoff=30, mode = "map-ont", out = ".", k = None, w = None, use_full_seq = False):
         self.read_id = header.split(" ")[0][1:]
         self.seq = seq
-        # dictionary of targets with int values: 0 = no align, 1 = prefix only, 2 = suffix only, 3 = both
+        # dictionary of targets with int values designations for type of alignment: 0 = no alignment, 1 = prefix only, 2 = suffix only, 3 = both aligned
         self.read_status = {}
         # mapq cutoff
         self.cutoff = cutoff
         self.mode = mode
+        # flag for no subsetting
         self.use_full_seq = use_full_seq
         # mappy parameters
         self.k = k
@@ -46,8 +47,9 @@ class Process_Read:
         else:
             aligner = mappy.Aligner(seq=self.seq,preset=self.mode,best_n = 1, k =self.k , w= self.w) #custom parameters
 
-        #align prefixes
+        # prefix alignment information
         prefix_dict = {"name":[],"prefix_start":[],"prefix_end":[],"prefix_mapq":[],"strand":[],"alignment_length":[]}
+        # suffix alignment information
         suffix_dict = {"name":[],"suffix_start":[],"suffix_end":[],"suffix_mapq":[],"strand":[],"alignment_length":[]}
 
         # save information from mappy in prefix dictionary of lists
@@ -63,7 +65,7 @@ class Process_Read:
                 prefix_dict["strand"].append(hit.strand)
                 prefix_dict["alignment_length"].append(hit.blen)
 
-        #align_suffixes
+        # align_suffixes
         for name, seq,qual in mappy.fastx_read(self.suffix_fa):
             for hit in aligner.map(seq):
                 if hit.mapq < self.cutoff:
@@ -75,8 +77,6 @@ class Process_Read:
                 suffix_dict["suffix_mapq"].append(hit.mapq)
                 suffix_dict["strand"].append(hit.strand)
                 suffix_dict["alignment_length"].append(hit.blen)
-
-
 
         #record if no valid alignment found
         if len(prefix_dict['name']) < 1:
@@ -107,21 +107,15 @@ class Process_Read:
             Stores an integer {0: no alignment at all, 1: prefix_only, 2: suffix_only, 3: both aligned}
         '''
 
-        # check if both prefix and suffix contain alignemnts
-
-        # if not isinstance(prefix_info, (bool)) and not isinstance(suffix_info, (bool)):
-        
+        # check if both prefix and suffix contain alignments
         # Check length of prefix and suffix
         if len(suffix_info.index) != 0 and len(prefix_info.index) != 0:
             
-            
             # check alignments are on the same strand
-
-                # forward strand
+            # forward strand
             if prefix_info.strand[0] == suffix_info.strand[0]: 
                 return(True,3)
-                
-            else:# reverse strand
+            else: # reverse strand
                 return(False,3)
 
         elif len(suffix_info.index) == 0 and len(prefix_info.index) == 0:
@@ -153,7 +147,7 @@ class Process_Read:
 
         #dictionary of info for current target
         info = {}
-        #may or may not want these in the dictionary, seems like a good idea to keep them together
+        # alignment information in dictionary
         info["repeat"] = row.repeat.rstrip()
         info["prefix"] = row.prefix.rstrip()
         info["suffix"] = row.suffix.rstrip() 
@@ -170,17 +164,16 @@ class Process_Read:
         else: 
             info["suffix_align_length"] = 0
 
-
         # both prefix and suffix info are present
         if self.read_status[row.name] == 3:
-        # get strand and start and end coordinates
+            # get strand and start and end coordinates
             if prefix_info.strand[0] == 1 and suffix_info.strand[0] == 1:
                 info["strand"] = "forward"
                 info["align_start"] = prefix_info.prefix_start[0]
                 info["align_end"] = suffix_info.suffix_end[0]
                 info["end_length"] = info["suffix_align_length"]
                 info["start_length"] = info["prefix_align_length"]
-            else: #reverse
+            else: #reverse strand
                 info["strand"] = "reverse"
                 info["align_start"] = suffix_info.suffix_start[0]
                 info["align_end"] = prefix_info.prefix_end[0]
@@ -197,12 +190,13 @@ class Process_Read:
             info["align_end"] = prefix_info.prefix_end[0]
             info["prefix_mapq"] = prefix_info.prefix_mapq[0]
 
+            # forward strand
             if prefix_info.strand[0] == 1:
                 info["strand"] = "forward"
                 info["end_length"] = 0
                 info["start_length"] = info["prefix_align_length"]
 
-            else: #reverse
+            else: #reverse strand
                 info["strand"] = "reverse"
                 info["end_length"] = info["prefix_align_length"]
                 info["start_length"] = 0
@@ -223,20 +217,20 @@ class Process_Read:
                 info["end_length"] = 0
                 info["start_length"] = info["suffix_align_length"]
 
-        # Review how to do subsetting with only prefix or suffix
+        # Use full sequence with no subset
         if self.use_full_seq:
             info["subset"] = self.seq
-            #ADDED record subset coords so we can calculate repeat coordinates
             info["subset_start"] = 0
-            info["subset_end"] = len(self.seq) -1
+            info["subset_end"] = len(self.seq) - 1
             return info
 
+        # Record subset coordinates 400 and 50 bp upstream and downstream of repeat
         start_extend_400 = info["align_start"] + info["start_length"] - 400
         end_extend_400 = info["align_end"] - info["end_length"] + 400
         start_extend_50 = info["align_start"] + info["start_length"] - 50
-        end_extend_50 = info["align_end"]-info["end_length"] + 50
+        end_extend_50 = info["align_end"] - info["end_length"] + 50
 
-        # cannot extend prefix
+        # cannot extend prefix 400 bp
         if start_extend_400 < 0:
             if info["start_length"] > 0:
                 info["subset_start"] = start_extend_50
@@ -245,7 +239,7 @@ class Process_Read:
         else:
             info["subset_start"] = start_extend_400
 
-        # cannot extend suffix
+        # cannot extend suffix 400 bp
         if end_extend_400 > len(self.seq):
             if info["end_length"] > 0:
                 info["subset_end"] = end_extend_50 -1
@@ -294,8 +288,8 @@ class Process_Read:
         if not (isinstance(self.suffix_df, (bool))):   
             candidate_suffix_aligns = self.suffix_df.groupby('name').head(1).reset_index()
         self.target_info = {}
-
-        #filter candidates that aren't in a compatible orientation and save final candidates FIXME: CURRENTLY NOT ITERATING 
+ 
+        #filter candidates that aren't in a compatible orientation and save final candidates 
         for row in candidate_targets.itertuples():
 
             if not (isinstance(self.prefix_df, (bool))):
@@ -304,12 +298,11 @@ class Process_Read:
             if not (isinstance(self.suffix_df, (bool))): 
                 suffix_info = candidate_suffix_aligns[candidate_suffix_aligns.name == row.name].reset_index()
 
-            #save valid regions' attributes
-            # keep status of read
+            # save valid regions' attributes
+            # keep status of read alignments
             oriented, read_status = self.keep_region(prefix_info, suffix_info) ###
 
             self.read_status[row.name] = read_status
-
 
             # prefix and suffix present and in right orientation
             if oriented:
@@ -347,10 +340,7 @@ class Process_Read:
         #loop across all identified targets
         #if no targets, return
         if self.target_info == {}:
-            # print(f"{self.read_id} has no targets")
             return False
-        
-        # print(f"iterating viterbi for: {self.read_id}")
 
         # iterate through all targets saved in the class
         for name in self.target_info.keys():
@@ -375,7 +365,6 @@ class Process_Read:
                 curr_hidden_states_rev_file = open(build_pre + "_" + name + rev_states,'r')
                 curr_states = curr_hidden_states_rev_file.readline().split(".")
                 curr_hidden_states_rev_file.close()
-
 
             #convert seqeunce to numeric so it is compatible with the C code
             numeric_seq = str(seq2int(self.target_info[name]["subset"].upper()))
@@ -404,9 +393,8 @@ class Process_Read:
                 label_file.write(self.read_id + "\t" +".".join(labeled_seq)+"\n")
             label_file.close()
 
-            # removed ,self.target_info[name]["subset"] argument
+            # count repeats
             count = count_repeats(labeled_seq,pointers,repeat_len)
-
 
             if self.read_status[name] == 3:
                 score = self.target_info[name]["prefix_mapq"] + self.target_info[name]["suffix_mapq"]
@@ -415,11 +403,11 @@ class Process_Read:
             else:
                 score = self.target_info[name]["prefix_mapq"]
 
-            #full reads
+            # save full reads
             if self.read_status[name] == 3:
                 out_file = open(out + "_" + name + "_counts.txt","a")
 
-            # non-spanning reads
+            # save non-spanning reads
             else:
                 out_file = open(out + "_" + name + "_estimated_counts.txt","a")
 

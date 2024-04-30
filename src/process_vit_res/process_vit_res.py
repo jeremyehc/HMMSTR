@@ -47,9 +47,9 @@ def label_states(vit_out, hidden_states):
         # genome2
         if conversion[seq_list[i]] == "G2" and pointers["G2"] == False:
             pointers["G2"] = i
-        if "D" in conversion[seq_list[i]]: #get indeces of all deletions
+        if "D" in conversion[seq_list[i]]: #get indices of all deletions
             pointers["D"].append(i)
-        if "I" in conversion[seq_list[i]]: #get indeces of all deletions
+        if "I" in conversion[seq_list[i]]: #get indices of all deletions
             pointers["I"].append(i)
 
     return labeled_seq, pointers,MLE
@@ -97,8 +97,6 @@ def calc_likelihood(vit_out, pointers, labeled_seq,hidden_states, read,subset_st
     #FIXME this doesn't account for the fact that deletions are included in pointers and NOT subset start should be as follows (update install)
     repeat_start = pointers["R"] + subset_start - sum(np.where(np.array(pointers["D"]) < pointers["R"], True, False))
     repeat_end = pointers["S"] + subset_start - sum(np.where(np.array(pointers["D"]) < pointers["S"], True, False))
-    # repeat_end =pointers["S"]-1 + subset_start
-    # repeat_start = pointers["R"] + subset_start
 
     final_labels = "-".join(labeled_seq[pointers["P"]:pointers["G2"]])
     num_pd = final_labels.count('PD')
